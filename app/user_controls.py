@@ -25,6 +25,6 @@ def trainerControl(id,cur,conn):
 def memberControl(id,cur,conn):
     choice =-1
     while choice!=0:
-        choice = memberMenu(id,cur)
+        choice = memberMenu()
         memberexecuteChoice(choice,id,cur)
         conn.commit()

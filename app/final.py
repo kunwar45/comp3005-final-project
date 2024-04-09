@@ -12,7 +12,7 @@ def isAdmin(id,cur):
     return cur.fetchone()[0]
 
 def isMember(id,cur):
-    cur.execute("SELECT EXISTS(SELECT 1 FROM member WHERE employee_id = %s)", (id,))
+    cur.execute("SELECT EXISTS(SELECT 1 FROM member WHERE member_id = %s)", (id,))
     return cur.fetchone()[0]
 
 def loginMenu(cur,conn):
