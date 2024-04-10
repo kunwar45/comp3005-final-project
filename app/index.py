@@ -1,4 +1,3 @@
-import os
 import psycopg2
 from CRUD import *
 from user_controls import *
@@ -31,7 +30,7 @@ def loginMenu(cur,conn):
             break
     
     if (choice==0):
-        print("Connectoin Closed")
+        print("Connection Closed")
         return
     elif (choice==1):
         id = input("Enter your ID: ")
@@ -50,8 +49,6 @@ def loginMenu(cur,conn):
     elif(choice==3):
         newMemberControl(cur,conn)
 
-
-            
 #Main Control Flow. Repeatedly prints the menu for user to choose an option from.
 def main():
     database_url= "postgresql://pythonApp:py123@localhost:5432/Final"
@@ -63,13 +60,9 @@ def main():
         
     except psycopg2.Error as e:
         print("Error connecting to the database:", e)
-
     #Control Flow, prints the seleciton menu and commits changes to the database 
-
     loginMenu(cur,conn)
-
     conn.close()
     
-main()
-
-
+if __name__ == "__main__":
+    main()

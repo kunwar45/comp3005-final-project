@@ -110,7 +110,6 @@ def getAllClasses(cur):
     if rows:
         print("\nAvailable Classes:")
         for row in rows:
-            
             id = str(row[0])
             time = row[1]
             purpose = row[2]
@@ -120,8 +119,6 @@ def getAllClasses(cur):
             curr = row[6]
             roomName = row[7]
             roomNum = row[8]
-
-
             if(max!=curr):#checks if 
                 print("\nClass ID: "+ id)
                 print(purpose,"Class with",trainer, "at",time,"in",roomName, "("+str(roomNum)+")")
@@ -130,8 +127,6 @@ def getAllClasses(cur):
     else:
         print("\nNo Classes found in the database.")
     
-
-
 def getGoals(member_id,cur):
     selectQuery="SELECT goal_id,description FROM goal WHERE member_id = %s"
     cur.execute(selectQuery,member_id)

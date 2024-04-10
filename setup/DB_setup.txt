@@ -20,13 +20,14 @@ CREATE TABLE employee (
 );
 -- Table creation for 'Admin'
 CREATE TABLE admin (
-     employee_id INT PRIMARY KEY,
+    admin_id SERIAL PRIMARY KEY,
+    employee_id INT NOT NULL,
     FOREIGN KEY (employee_id) REFERENCES employee(employee_id)
 );
-
 -- Table creation for 'Trainer'
 CREATE TABLE trainer (
-    employee_id INT PRIMARY KEY,
+    trainer_id SERIAL PRIMARY KEY,
+    employee_id INT NOT NULL,
     available_time TIME,
     FOREIGN KEY (employee_id) REFERENCES employee(employee_id)
 );
@@ -40,14 +41,15 @@ CREATE TABLE subscription (
 -- Table creation for 'Member' with foreign key to 'Subscription'
 CREATE TABLE member (
     member_id SERIAL PRIMARY KEY,
-    name VARCHAR(255)
-    subscription_id INT, -- Assuming the foreign key field is named 'subscription_id'
+    name VARCHAR(255),
+    subscription_id INT NOT NULL, -- Assuming the foreign key field is named 'subscription_id'
     FOREIGN KEY (subscription_id) REFERENCES subscription(subscription_id)
 );
 CREATE TABLE goal (
     goal_id SERIAL PRIMARY KEY,
-    member_id INT,
+    member_id INT NOT NULL,
     description TEXT,
+    FOREIGN KEY (member_id) REFERENCES member(member_id)
 );
 -- Table creation for 'Class'
 CREATE TABLE class (
@@ -55,20 +57,14 @@ CREATE TABLE class (
     time TIME,
     purpose TEXT,
     description TEXT,
-    trainer_id INT,
+    trainer_id INT NOT NULL,
     max_attendance INT, 
     current_num_attendees INT, 
     FOREIGN KEY (trainer_id) REFERENCES trainer(employee_id)
 );
-
-INSERT INTO class (time, purpose, description, trainer_id, max_attendance, current_num_attendees)
-VALUES 
-    ('09:00:00', 'Mobility', 'Yoga', 1, 20, 0), -- Class run by Sam Sulek (trainer_id = 1)
-    ('16:00:00', 'Cardio', 'Afternoon Run', 3, 15, 0); -- Class run by Matt (trainer_id = 3)
-
 CREATE TABLE takes (
-    member_id INT,
-    class_id INT,
+    member_id INT NOT NULL,
+    class_id INT NOT NULL,
     PRIMARY KEY (member_id, class_id),
     FOREIGN KEY (member_id) REFERENCES member(member_id),
     FOREIGN KEY (class_id) REFERENCES class(class_id)
@@ -83,8 +79,8 @@ CREATE TABLE room (
 -- Table creation for 'Booking'
 CREATE TABLE booking (
     booking_id SERIAL PRIMARY KEY,
-    class_id INT,
-    room_id INT,
+    class_id INT NOT NULL,
+    room_id INT NOT NULL,
     FOREIGN KEY (class_id) REFERENCES class(class_id),
     FOREIGN KEY (room_id) REFERENCES room(room_id)
 );

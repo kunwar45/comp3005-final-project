@@ -17,11 +17,11 @@ INSERT INTO goal (member_id, description) VALUES (5, 'bench 5');
 INSERT INTO goal (member_id, description) VALUES (5, 'run 6');
 INSERT INTO goal (member_id, description) VALUES (5, 'swim 2');
 
-INSERT INTO employee (employee_id, name)
+INSERT INTO employee (name)
 VALUES 
-    (1, 'Sam Sulek'),
-    (2, 'Austin'),
-    (3, 'Matt');
+    ('Sam Sulek'),
+    ('Austin'),
+    ('Matt');
     
 INSERT INTO trainer (employee_id)
 VALUES 

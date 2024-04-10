@@ -6,13 +6,13 @@ def newMemberMenu():
         print("1: View Subscriptions")
         print("2: Register")
 
-
         #Takes in input and validates it
         choice = int(input("Please select an option: "))
         if choice < 0 or choice > 2:
             print("\nInvalid input. Please enter a number between 0 and 4.\n ")
         else:
             return choice
+
 #Calls the appropriate CRUD function based on the user's choice
 def newMemberexecuteChoice(choice,cur):
     match(choice):
@@ -32,6 +32,7 @@ def addMember(cur):
     insert_query = "INSERT INTO member (name, subscription_id) VALUES (%s, %s)"
     cur.execute(insert_query, memberTuple)
     return 0
+
 #Prints all the tiers of every student
 def getTiers(cur):
     selectQuery = "SELECT * FROM subscription"
