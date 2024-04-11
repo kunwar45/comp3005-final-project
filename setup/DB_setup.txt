@@ -27,29 +27,47 @@ CREATE TABLE admin (
 -- Table creation for 'Trainer'
 CREATE TABLE trainer (
     trainer_id SERIAL PRIMARY KEY,
-    available_time TIME,
     employee_id INT NOT NULL,
     FOREIGN KEY (employee_id) REFERENCES employee(employee_id)
+);
+
+-- Table creation for 'Available TIme'
+CREATE TABLE available_time (
+    available_time_id SERIAL PRIMARY KEY,
+    date DATE NOT NULL,
+    start_time TIME,
+    end_time TIME,
+    trainer_id INT NOT NULL,
+    FOREIGN KEY (trainer_id) REFERENCES trainer(trainer_id)
 );
 
 -- Table creation for 'Subscription'
 CREATE TABLE subscription (
     subscription_id SERIAL PRIMARY KEY,
-    tier_name VARCHAR(255),
+    tier_name VARCHAR(255) NOT NULL,
     description TEXT,
-    price NUMERIC(10, 2)
+    price NUMERIC(10, 2) NOT NULL
 );
 -- Table creation for 'Member' with foreign key to 'Subscription'
 CREATE TABLE member (
     member_id SERIAL PRIMARY KEY,
-    name VARCHAR(255),
+    name VARCHAR(255) NOT NULL,
     subscription_id INT NOT NULL, -- Assuming the foreign key field is named 'subscription_id'
     FOREIGN KEY (subscription_id) REFERENCES subscription(subscription_id)
 );
+
+CREATE TABLE exercise_routine (
+    exercise_routine_id SERIAL PRIMARY KEY,
+    member_id INT NOT NULL,
+    description TEXT,
+    FOREIGN KEY (member_id) REFERENCES member(member_id)
+);
+
 CREATE TABLE goal (
     goal_id SERIAL PRIMARY KEY,
     member_id INT NOT NULL,
     description TEXT,
+    date_completed DATE,
     FOREIGN KEY (member_id) REFERENCES member(member_id)
 );
 -- Table creation for 'Class'
@@ -87,11 +105,28 @@ CREATE TABLE booking (
     FOREIGN KEY (room_id) REFERENCES room(room_id)
 );
 
+-- Table creation for 'Equipment'
+CREATE TABLE equipment (
+    equipment_id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    room_id INT NOT NULL,
+    description TEXT,
+    FOREIGN KEY (room_id) REFERENCES room(room_id)
+);
+
 CREATE TABLE metrics (
     metrics_id SERIAL PRIMARY KEY,
     member_id INT NOT NULL,
     weight INT NOT NULL,
     height INT NOT NULL,
     age INT NOT NULL,
+    FOREIGN KEY (member_id) REFERENCES member(member_id)
+);
+
+CREATE TABLE billing (
+    billing_id SERIAL PRIMARY KEY,
+    member_id INT NOT NULL,
+    date_billed DATE NOT NULL,
+    payed BOOLEAN NOT NULL,
     FOREIGN KEY (member_id) REFERENCES member(member_id)
 );
