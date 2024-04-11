@@ -21,17 +21,18 @@ def newMemberexecuteChoice(choice,cur):
         case 1:
             getTiers(cur)
         case 2:
-            addMember(cur)
+            return addMember(cur)
         
 #Adds Member to Database
 def addMember(cur):
     name = input("Enter your Name: ")
-    tier = input("Enter the tier number: ")
-    memberTuple = (name,tier)
+    tier = input("Enter the tier number (1,2,3): ")
+    tier_name = {"1":"Bronze","2":"Silver","3":"Gold"}
+    memberTuple = (name,tier_name[tier])
 
-    insert_query = "INSERT INTO member (name, subscription_id) VALUES (%s, %s)"
+    insert_query = "INSERT INTO member (name, subscription_id) VALUES (%s, (SELECT subscription_id FROM subscription WHERE tier_name = %s))"
     cur.execute(insert_query, memberTuple)
-    return 0
+    return 1
 
 #Prints all the tiers of every student
 def getTiers(cur):
@@ -42,8 +43,8 @@ def getTiers(cur):
 
     if tiers:
         print("\nAll available subscriptions:")
-        for tier in tiers:
-            print("\n"+ tier[1]+" ID:", tier[0])
+        for i, tier in enumerate(tiers):
+            print("\nTier " + str(i+1) + ": " + tier[1])
             print("Description:", tier[2])
             print("Price:",str(tier[3]) +"$ montly")
     else:

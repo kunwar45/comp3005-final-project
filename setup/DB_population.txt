@@ -24,7 +24,7 @@ INSERT INTO employee (name) VALUES
     ('Sam Sulek'),
     ('Austin Pham'),
     ('Matt Stark');
-    
+
 INSERT INTO trainer (employee_id) VALUES
     ((SELECT employee_id FROM employee WHERE name = 'Sam Sulek')),
     ((SELECT employee_id FROM employee WHERE name = 'Matt Stark'));
@@ -34,7 +34,7 @@ INSERT INTO admin (employee_id) VALUES
 
 INSERT INTO class (class_name, time, purpose, description, trainer_id, max_attendance, current_num_attendees) VALUES 
     ('Yoga', '09:00:00', 'Mobility', 'Group Yoga', (SELECT t.trainer_id FROM trainer t JOIN employee e ON t.employee_id = e.employee_id WHERE e.name = 'Sam Sulek'), 20, 0), -- Class run by Sam Sulek 
-    ('Run', '16:00:00', 'Cardio', 'Afternoon Run', (SELECT t.trainer_id FROM trainer t JOIN employee e ON t.employee_id = e.employee_id WHERE e.name = 'Matt'), 15, 0); -- Class run by Matt Stark
+    ('Run', '16:00:00', 'Cardio', 'Afternoon Run', (SELECT t.trainer_id FROM trainer t JOIN employee e ON t.employee_id = e.employee_id WHERE e.name = 'Matt Stark'), 15, 0); -- Class run by Matt Stark
 
 INSERT INTO room (room_number, name, description) VALUES
     (101, 'Ravens Nest', 'Indoor track and soccer field'),
@@ -79,7 +79,7 @@ INSERT INTO booking (class_id, room_id) VALUES
 INSERT INTO equipment (name, room_id, description, last_serviced) VALUES 
     ('Treadmill', (SELECT room_id FROM room WHERE name = 'Ravens Nest'), 'Treadmill for cardio workouts.', '2023-04-26'),
     ('Elliptical', (SELECT room_id FROM room WHERE name = 'Ravens Nest'), 'Elliptical for low-impact cardio.', '2023-09-06');
-
+    
 INSERT INTO equipment (name, room_id, description, last_serviced) VALUES 
     ('Yoga Mat', (SELECT room_id FROM room WHERE name = 'Yoga Room'), 'Yoga Mat for yoga sessions.', '2024-04-02'),
     ('Foam Roller', (SELECT room_id FROM room WHERE name = 'Yoga Room'), 'Foam Roller for muscle relaxation.', '2023-12-23');

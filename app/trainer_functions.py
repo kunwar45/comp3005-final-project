@@ -1,6 +1,6 @@
-def trainerMenu(id,cur):
-    cur.execute("SELECT name FROM employee WHERE employee_id=%s",id)
-    name= cur.fetchone()[0]
+def trainerMenu(name,cur):
+    # cur.execute("SELECT employee_id FROM trainer WHERE name=%s", (name,))
+    # id= cur.fetchone()[0]
     while True:
         #Prints all options
         print("\nHello trainer", name)

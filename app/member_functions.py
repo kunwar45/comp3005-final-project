@@ -28,11 +28,11 @@ def memberexecuteChoice(choice,id,cur):
             viewMyClassses(id,cur)
         case 4:
             deleteClass(id,cur)
+
 def deleteClass(id, cur):
     classId= input("Enter Class ID you want to remove: ")
     cur.execute("DELETE FROM takes WHERE member_id = %s AND class_id = %s", (id, classId))
     print("Deletion successful!")
-
 
 def viewMyClassses(id,cur):
     query=  """
@@ -54,7 +54,7 @@ def viewMyClassses(id,cur):
         takes.member_id = %s;
 
     """
-    cur.execute(query,id)
+    cur.execute(query,(id,))
     rows = cur.fetchall()
 
     if rows:

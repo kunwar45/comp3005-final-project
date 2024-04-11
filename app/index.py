@@ -2,25 +2,22 @@ import psycopg2
 from CRUD import *
 from user_controls import *
 
-def isTrainer(id,cur):
-    cur.execute("SELECT EXISTS(SELECT 1 FROM Trainer WHERE employee_id = %s)", (id,))
+def isTrainer(name,cur):
+    cur.execute("SELECT EXISTS(SELECT 1 FROM trainer JOIN employee ON trainer.employee_id = employee.employee_id WHERE employee.name = %s)", (name,))
     return cur.fetchone()[0]
 
 # Function to check if ID exists in Admin table
-def isAdmin(id,cur):
-    cur.execute("SELECT EXISTS(SELECT 1 FROM Admin WHERE employee_id = %s)", (id,))
+def isAdmin(name,cur):
+    cur.execute("SELECT EXISTS(SELECT 1 FROM admin JOIN employee ON admin.employee_id = employee.employee_id WHERE employee.name = %s)", (name,))
     return cur.fetchone()[0]
 
-def isMember(id,cur):
-    cur.execute("SELECT EXISTS(SELECT 1 FROM member WHERE member_id = %s)", (id,))
+def isMember(name,cur):
+    cur.execute("SELECT EXISTS(SELECT 1 FROM member WHERE name = %s)", (name,))
     return cur.fetchone()[0]
-
-# def isRole(id, role, cur):
-#     cur.execute("SELECT EXISTS(SELECT 1 FROM member WHERE %s_id = %s)", (role,id,))
-#     return cur.fetchone()[0]
 
 def loginMenu(cur,conn):
-    while True:
+    choice = -1
+    while choice != 0:
         #Prints all options
         print("\n0: Exit")
         print("1: Employee Sign In")
@@ -38,7 +35,7 @@ def loginMenu(cur,conn):
         print("Connection Closed")
         return
     elif (choice==1):
-        id = input("Enter your ID: ")
+        id = input("Enter your Name: ")
         if(isAdmin(id,cur)):
             adminControl(id,cur,conn)
         elif (isTrainer(id,cur)):
@@ -46,11 +43,11 @@ def loginMenu(cur,conn):
         else:
             print("You are not an employee.")
     elif(choice ==2):
-        id = input("Enter your ID: ")
-        if(isMember(id,cur)):
-            memberControl(id,cur,conn)
+        name = input("Enter your Name: ")
+        if(isMember(name,cur)):
+            memberControl(name,cur,conn)
         else:
-            print("No member with that ID.")
+            print("No member with that name.")
     elif(choice==3):
         newMemberControl(cur,conn)
 
