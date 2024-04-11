@@ -27,10 +27,11 @@ CREATE TABLE admin (
 -- Table creation for 'Trainer'
 CREATE TABLE trainer (
     trainer_id SERIAL PRIMARY KEY,
-    employee_id INT NOT NULL,
     available_time TIME,
+    employee_id INT NOT NULL,
     FOREIGN KEY (employee_id) REFERENCES employee(employee_id)
 );
+
 -- Table creation for 'Subscription'
 CREATE TABLE subscription (
     subscription_id SERIAL PRIMARY KEY,
@@ -54,13 +55,14 @@ CREATE TABLE goal (
 -- Table creation for 'Class'
 CREATE TABLE class (
     class_id SERIAL PRIMARY KEY,
+    class_name VARCHAR(255) NOT NULL,
     time TIME,
     purpose TEXT,
     description TEXT,
     trainer_id INT NOT NULL,
     max_attendance INT, 
     current_num_attendees INT, 
-    FOREIGN KEY (trainer_id) REFERENCES trainer(employee_id)
+    FOREIGN KEY (trainer_id) REFERENCES trainer(trainer_id)
 );
 CREATE TABLE takes (
     member_id INT NOT NULL,
@@ -72,7 +74,7 @@ CREATE TABLE takes (
 -- Table creation for 'Room'
 CREATE TABLE room (
     room_id SERIAL PRIMARY KEY,
-    room_number INT,
+    room_number INT UNIQUE NOT NULL,
     name TEXT,
     description TEXT
 );
@@ -83,4 +85,13 @@ CREATE TABLE booking (
     room_id INT NOT NULL,
     FOREIGN KEY (class_id) REFERENCES class(class_id),
     FOREIGN KEY (room_id) REFERENCES room(room_id)
+);
+
+CREATE TABLE metrics (
+    metrics_id SERIAL PRIMARY KEY,
+    member_id INT NOT NULL,
+    weight INT NOT NULL,
+    height INT NOT NULL,
+    age INT NOT NULL,
+    FOREIGN KEY (member_id) REFERENCES member(member_id)
 );
