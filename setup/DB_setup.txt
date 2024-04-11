@@ -18,12 +18,14 @@ CREATE TABLE employee (
     employee_id SERIAL PRIMARY KEY,
     name VARCHAR(255)
 );
+
 -- Table creation for 'Admin'
 CREATE TABLE admin (
     admin_id SERIAL PRIMARY KEY,
     employee_id INT NOT NULL,
     FOREIGN KEY (employee_id) REFERENCES employee(employee_id)
 );
+
 -- Table creation for 'Trainer'
 CREATE TABLE trainer (
     trainer_id SERIAL PRIMARY KEY,
@@ -48,6 +50,7 @@ CREATE TABLE subscription (
     description TEXT,
     price NUMERIC(10, 2) NOT NULL
 );
+
 -- Table creation for 'Member' with foreign key to 'Subscription'
 CREATE TABLE member (
     member_id SERIAL PRIMARY KEY,
@@ -70,6 +73,7 @@ CREATE TABLE goal (
     date_completed DATE,
     FOREIGN KEY (member_id) REFERENCES member(member_id)
 );
+
 -- Table creation for 'Class'
 CREATE TABLE class (
     class_id SERIAL PRIMARY KEY,
@@ -82,6 +86,7 @@ CREATE TABLE class (
     current_num_attendees INT, 
     FOREIGN KEY (trainer_id) REFERENCES trainer(trainer_id)
 );
+
 CREATE TABLE takes (
     member_id INT NOT NULL,
     class_id INT NOT NULL,
@@ -89,13 +94,15 @@ CREATE TABLE takes (
     FOREIGN KEY (member_id) REFERENCES member(member_id),
     FOREIGN KEY (class_id) REFERENCES class(class_id)
 );
+
 -- Table creation for 'Room'
 CREATE TABLE room (
     room_id SERIAL PRIMARY KEY,
     room_number INT UNIQUE NOT NULL,
-    name TEXT,
+    name TEXT UNIQUE,
     description TEXT
 );
+
 -- Table creation for 'Booking'
 CREATE TABLE booking (
     booking_id SERIAL PRIMARY KEY,
@@ -111,6 +118,7 @@ CREATE TABLE equipment (
     name VARCHAR(255) NOT NULL,
     room_id INT NOT NULL,
     description TEXT,
+    last_serviced DATE NOT NULL,
     FOREIGN KEY (room_id) REFERENCES room(room_id)
 );
 

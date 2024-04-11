@@ -27,9 +27,10 @@ def adminExecuteChoice(choice,cur):
             bookClass(cur)
         case 3:
             viewEquipment(cur)
+
 def viewEquipment(cur):
     query = """
-    SELECT e.equipment_id, e.name AS equipment_name, e.condition, r.name AS room_name, e.last_serviced
+    SELECT e.equipment_id, e.name AS equipment_name, e.description, r.name AS room_name, e.last_serviced
     FROM equipment e
     JOIN room r ON e.room_id = r.room_id
     """

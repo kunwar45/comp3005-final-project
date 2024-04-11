@@ -1,53 +1,106 @@
-
-INSERT INTO subscription (tier_name, description, price)
-VALUES 
+INSERT INTO subscription (tier_name, description, price) VALUES 
     ('Bronze', 'Access to gym equipment and classes', 10.00),
     ('Silver', 'Access to gym equipment and classes, pool and sauna', 20.00),
     ('Gold', 'Access to all facilities, towel service, and exclusive events', 30.00);
 
+INSERT INTO member (name, subscription_id) VALUES 
+    ('John Adams', (SELECT subscription_id FROM subscription WHERE tier_name = 'Bronze')),
+    ('May First', (SELECT subscription_id FROM subscription WHERE tier_name = 'Bronze')),
+    ('Allen Sam', (SELECT subscription_id FROM subscription WHERE tier_name = 'Silver')),
+    ('Sarah We', (SELECT subscription_id FROM subscription WHERE tier_name = 'Gold'));
 
-INSERT INTO member (name, subscription_id)
-VALUES 
-    ('John', (SELECT subscription_id FROM subscription WHERE tier_name = 'Bronze')),
-    ('May', (SELECT subscription_id FROM subscription WHERE tier_name = 'Bronze')),
-    ('Allen', (SELECT subscription_id FROM subscription WHERE tier_name = 'Silver')),
-    ('Sarah', (SELECT subscription_id FROM subscription WHERE tier_name = 'Gold'));
+INSERT INTO metrics (member_id, weight, height, age) VALUES
+    ((SELECT member_id FROM member WHERE name = 'John Adams'), 70, 175, 30),
+    ((SELECT member_id FROM member WHERE name = 'May First'), 60, 165, 25),
+    ((SELECT member_id FROM member WHERE name = 'Allen Sam'), 80, 180, 35),
+    ((SELECT member_id FROM member WHERE name = 'Sarah We'), 55, 160, 28);
 
--- Insert sample goals linked to members by their IDs
-INSERT INTO goal (member_id, description) VALUES
-((SELECT member_id FROM member WHERE name = 'John'), 'Complete marathon under 4 hours'),
-((SELECT member_id FROM member WHERE name = 'John'), 'Bench 225'),
-((SELECT member_id FROM member WHERE name = 'John'), 'Swim 4K');
+INSERT INTO goal (member_id, description, date_completed) VALUES
+    ((SELECT member_id FROM member WHERE name = 'John Adams'), 'Run 10K', NULL),
+    ((SELECT member_id FROM member WHERE name = 'John Adams'), 'Bench 225', NULL),
+    ((SELECT member_id FROM member WHERE name = 'John Adams'), 'Swim 4K', NULL);
 
-INSERT INTO employee (name)
-VALUES 
+INSERT INTO employee (name) VALUES 
     ('Sam Sulek'),
-    ('Austin'),
-    ('Matt');
+    ('Austin Pham'),
+    ('Matt Stark');
     
-INSERT INTO trainer (employee_id, available_time) VALUES
-((SELECT employee_id FROM employee WHERE name = 'Sam Sulek'), '09:00:00'),
-((SELECT employee_id FROM employee WHERE name = 'Matt'), '14:00:00');
+INSERT INTO trainer (employee_id) VALUES
+    ((SELECT employee_id FROM employee WHERE name = 'Sam Sulek')),
+    ((SELECT employee_id FROM employee WHERE name = 'Matt Stark'));
 
-INSERT INTO class (class_name, time, purpose, description, trainer_id, max_attendance, current_num_attendees)
-VALUES 
-    ('Yoga', '09:00:00', 'Mobility', 'Group Yoga', (SELECT t.trainer_id FROM trainer t JOIN employee e ON t.employee_id = e.employee_id WHERE e.name = 'Sam Sulek'), 20, 0), -- Class run by Sam Sulek (trainer_id = 1)
-    ('Run', '16:00:00', 'Cardio', 'Afternoon Run', (SELECT t.trainer_id FROM trainer t JOIN employee e ON t.employee_id = e.employee_id WHERE e.name = 'Matt'), 15, 0); -- Class run by Matt (trainer_id = 3)
+INSERT INTO admin (employee_id) VALUES 
+    ((SELECT employee_id FROM employee WHERE name = 'Austin Pham'));
 
-INSERT INTO admin (employee_id)
-VALUES 
-    ((SELECT employee_id FROM employee WHERE name = 'Austin'));
-INSERT INTO room (room_number, name, description)
-VALUES
+INSERT INTO class (class_name, time, purpose, description, trainer_id, max_attendance, current_num_attendees) VALUES 
+    ('Yoga', '09:00:00', 'Mobility', 'Group Yoga', (SELECT t.trainer_id FROM trainer t JOIN employee e ON t.employee_id = e.employee_id WHERE e.name = 'Sam Sulek'), 20, 0), -- Class run by Sam Sulek 
+    ('Run', '16:00:00', 'Cardio', 'Afternoon Run', (SELECT t.trainer_id FROM trainer t JOIN employee e ON t.employee_id = e.employee_id WHERE e.name = 'Matt'), 15, 0); -- Class run by Matt Stark
+
+INSERT INTO room (room_number, name, description) VALUES
     (101, 'Ravens Nest', 'Indoor track and soccer field'),
     (102, 'Yoga Room', 'Open spacious fitness room with free weights and mats.'),
     (103, 'Gym', 'Modern fitness room featuring state-of-the-art equipment and exercise stations.');
-INSERT INTO booking (class_id,room_id)
-VALUES 
-    (2,1);
 
-INSERT INTO metrics (member_id, weight, height, age) VALUES
-((SELECT member_id FROM member WHERE name = 'John'), 70, 175, 30),
-((SELECT member_id FROM member WHERE name = 'May'), 60, 165, 25),
-((SELECT member_id FROM member WHERE name = 'Allen'), 80, 180, 35),
-((SELECT member_id FROM member WHERE name = 'Sarah'), 55, 160, 28);
+INSERT INTO exercise_routine (member_id, description) VALUES 
+    ((SELECT member_id FROM member WHERE name = 'Allen Sam'), 'Circuit training: 5 rounds of push-ups, sit-ups, and squats'),
+    ((SELECT member_id FROM member WHERE name = 'May First'), 'Circuit training: 5 rounds of push-ups, sit-ups, and squats'),
+    ((SELECT member_id FROM member WHERE name = 'Allen Sam'), 'Swim for 30 minutes followed by 15 minutes of yoga'),
+    ((SELECT member_id FROM member WHERE name = 'Sarah We'), '3 sets of 12 reps bench press, 3 sets of 10 reps squat'),
+    ((SELECT member_id FROM member WHERE name = 'Allen Sam'), '30 minutes of high-intensity interval training'),
+    ((SELECT member_id FROM member WHERE name = 'Allen Sam'), '2 hours of mixed martial arts training'),
+    ((SELECT member_id FROM member WHERE name = 'Allen Sam'), 'Circuit training: 5 rounds of push-ups, sit-ups, and squats'),
+    ((SELECT member_id FROM member WHERE name = 'Allen Sam'), 'Circuit training: 5 rounds of push-ups, sit-ups, and squats'),
+    ((SELECT member_id FROM member WHERE name = 'John Adams'), 'Swim for 30 minutes followed by 15 minutes of yoga'),
+    ((SELECT member_id FROM member WHERE name = 'John Adams'), '30 minutes of high-intensity interval training');
+
+INSERT INTO available_time (date, start_time, end_time, trainer_id) VALUES 
+    ('2024-04-13', '11:00:00', '13:00:00', (SELECT trainer_id FROM trainer JOIN employee ON trainer.employee_id = employee.employee_id WHERE employee.name = 'Sam Sulek')),
+    ('2024-05-01', '16:00:00', '18:00:00', (SELECT trainer_id FROM trainer JOIN employee ON trainer.employee_id = employee.employee_id WHERE employee.name = 'Sam Sulek')),
+    ('2024-05-04', '14:00:00', '16:00:00', (SELECT trainer_id FROM trainer JOIN employee ON trainer.employee_id = employee.employee_id WHERE employee.name = 'Sam Sulek')),
+    ('2024-04-24', '11:00:00', '13:00:00', (SELECT trainer_id FROM trainer JOIN employee ON trainer.employee_id = employee.employee_id WHERE employee.name = 'Matt Stark')),
+    ('2024-04-15', '09:00:00', '11:00:00', (SELECT trainer_id FROM trainer JOIN employee ON trainer.employee_id = employee.employee_id WHERE employee.name = 'Matt Stark')),
+    ('2024-04-22', '16:00:00', '18:00:00', (SELECT trainer_id FROM trainer JOIN employee ON trainer.employee_id = employee.employee_id WHERE employee.name = 'Sam Sulek')),
+    ('2024-05-09', '09:00:00', '11:00:00', (SELECT trainer_id FROM trainer JOIN employee ON trainer.employee_id = employee.employee_id WHERE employee.name = 'Matt Stark')),
+    ('2024-05-01', '09:00:00', '11:00:00', (SELECT trainer_id FROM trainer JOIN employee ON trainer.employee_id = employee.employee_id WHERE employee.name = 'Matt Stark')),
+    ('2024-04-16', '14:00:00', '16:00:00', (SELECT trainer_id FROM trainer JOIN employee ON trainer.employee_id = employee.employee_id WHERE employee.name = 'Matt Stark')),
+    ('2024-05-07', '14:00:00', '16:00:00', (SELECT trainer_id FROM trainer JOIN employee ON trainer.employee_id = employee.employee_id WHERE employee.name = 'Sam Sulek'));
+
+INSERT INTO takes (member_id, class_id) VALUES 
+    ((SELECT member_id FROM member WHERE name = 'John Adams'), (SELECT class_id FROM class WHERE class_name = 'Yoga')),
+    ((SELECT member_id FROM member WHERE name = 'May First'), (SELECT class_id FROM class WHERE class_name = 'Yoga')),
+    ((SELECT member_id FROM member WHERE name = 'Allen Sam'), (SELECT class_id FROM class WHERE class_name = 'Run')),
+    ((SELECT member_id FROM member WHERE name = 'Sarah We'), (SELECT class_id FROM class WHERE class_name = 'Yoga')),
+    ((SELECT member_id FROM member WHERE name = 'John Adams'), (SELECT class_id FROM class WHERE class_name = 'Run'));
+
+INSERT INTO booking (class_id, room_id) VALUES 
+    ((SELECT class_id FROM class WHERE class_name = 'Yoga'), (SELECT room_id FROM room WHERE name = 'Yoga Room')),
+    ((SELECT class_id FROM class WHERE class_name = 'Run'), (SELECT room_id FROM room WHERE name = 'Ravens Nest'));
+
+INSERT INTO equipment (name, room_id, description, last_serviced) VALUES 
+    ('Treadmill', (SELECT room_id FROM room WHERE name = 'Ravens Nest'), 'Treadmill for cardio workouts.', '2023-04-26'),
+    ('Elliptical', (SELECT room_id FROM room WHERE name = 'Ravens Nest'), 'Elliptical for low-impact cardio.', '2023-09-06');
+
+INSERT INTO equipment (name, room_id, description, last_serviced) VALUES 
+    ('Yoga Mat', (SELECT room_id FROM room WHERE name = 'Yoga Room'), 'Yoga Mat for yoga sessions.', '2024-04-02'),
+    ('Foam Roller', (SELECT room_id FROM room WHERE name = 'Yoga Room'), 'Foam Roller for muscle relaxation.', '2023-12-23');
+
+INSERT INTO equipment (name, room_id, description, last_serviced) VALUES 
+    ('Dumbbell', (SELECT room_id FROM room WHERE name = 'Gym'), 'Dumbbells for strength training.', '2023-07-17'),
+    ('Squat Rack', (SELECT room_id FROM room WHERE name = 'Gym'), 'Squat Rack for squats and lifts.', '2023-08-02');
+
+INSERT INTO billing (member_id, date_billed, payed) VALUES 
+    ((SELECT member_id FROM member WHERE name = 'John Adams'), '2024-01-01', TRUE),
+    ((SELECT member_id FROM member WHERE name = 'John Adams'), '2024-02-01', TRUE),
+    ((SELECT member_id FROM member WHERE name = 'John Adams'), '2024-03-01', TRUE),
+    
+    ((SELECT member_id FROM member WHERE name = 'May First'), '2024-01-01', TRUE),
+    ((SELECT member_id FROM member WHERE name = 'May First'), '2024-02-01', TRUE),
+    ((SELECT member_id FROM member WHERE name = 'May First'), '2024-03-01', TRUE),
+    
+    ((SELECT member_id FROM member WHERE name = 'Allen Sam'), '2024-01-01', TRUE),
+    ((SELECT member_id FROM member WHERE name = 'Allen Sam'), '2024-02-01', TRUE),
+    ((SELECT member_id FROM member WHERE name = 'Allen Sam'), '2024-03-01', TRUE),
+    
+    ((SELECT member_id FROM member WHERE name = 'Sarah We'), '2024-01-01', TRUE),
+    ((SELECT member_id FROM member WHERE name = 'Sarah We'), '2024-02-01', TRUE),
+    ((SELECT member_id FROM member WHERE name = 'Sarah We'), '2024-03-01', TRUE);
