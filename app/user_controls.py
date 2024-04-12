@@ -2,10 +2,10 @@ from new_member_functions import *
 from member_functions import *
 from admin_functions import *
 from trainer_functions import *
-
 def adminControl(id,cur,conn): 
     choice =-1
     while choice!=0:
+   
         choice = adminMenu(id,cur)
         adminExecuteChoice(choice,cur)
         conn.commit()    
@@ -13,6 +13,7 @@ def adminControl(id,cur,conn):
 def newMemberControl(cur,conn):
     choice =-1
     while choice!=0 and choice!=2:
+      
         choice = newMemberMenu()
         name = newMemberexecuteChoice(choice,cur)
         if (choice==2):
@@ -29,7 +30,7 @@ def trainerControl(name,cur,conn):
 
 def memberControl(name,cur,conn):
     choice =-1
-    while choice!=0 and choice!=2:
+    while choice!=0:
         choice = memberMenu()
         memberexecuteChoice(choice,name,cur)
         conn.commit()

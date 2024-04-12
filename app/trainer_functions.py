@@ -5,27 +5,40 @@ def trainerMenu(name,cur):
         #Prints all options
         print("\nHello trainer", name)
         print("0: Exit Program")
-        print("1: Add Class")
-        print("2: Search member profile")
-        print("3: Add Available Time")
+        print("1: Search member profile")
+        print("2: Add Available Time")
 
 
         #Takes in input and validates it
         choice = int(input("Please select an option: "))
-        if choice < 0 or choice > 4:
+        if choice < 0 or choice > 2:
             print("\nInvalid input. Please enter a number between 0 and 4.\n ")
         else:
             return choice
             
 #Calls the appropriate CRUD function based on the user's choice
-def trainerExecuteChoice(choice,id,cur):
+def trainerExecuteChoice(choice,name,cur):
     match(choice):
         case 0:
             print("Connection Closed")
         case 1:
-            addClass(cur,id)
-        case 2:
             searchMember(cur)
+        case 2:
+            addAvailableTime(cur,name)
+def addAvailableTime(cur,name):
+    cur.execute("SELECT trainer_id FROM trainer JOIN employee ON trainer.employee_id = employee.employee_id WHERE employee.name = %s", (name,))
+    trainer_id = cur.fetchone()
+
+    # Prompt the trainer for available time details
+    date = input("Enter the date (YYYY-MM-DD): ")
+    start_time = input("Enter the start time (HH:MM:SS): ")
+    end_time = input("Enter the end time (HH:MM:SS): ")
+    
+    # Insert the available time into the database
+    cur.execute("INSERT INTO available_time (date, start_time, end_time, trainer_id) VALUES (%s, %s, %s, %s)", (date, start_time, end_time, trainer_id[0]))
+    print("Available time added successfully!")
+
+
         
 def searchMember(cur):
     memberName = input("\nEnter member's name: ")

@@ -34,6 +34,8 @@ INSERT INTO admin (employee_id) VALUES
 
 -- Inserting classes with details matching the provided available times
 INSERT INTO class (class_name, start_time, end_time, date, purpose, description, trainer_id, max_attendance, current_num_attendees) VALUES 
+    ('Personal Yoga', '14:00:00', '16:00:00', '2024-04-16', 'Flexibility', 'Solo Yoga Session focusing on flexibility and core strength.', (SELECT trainer_id FROM trainer JOIN employee ON trainer.employee_id = employee.employee_id WHERE employee.name = 'Matt Stark'), 1, 0),
+    ('Personal Kickboxing', '11:00:00', '13:00:00', '2024-04-13', 'Self-Defence', 'Solo defence Session.', (SELECT trainer_id FROM trainer JOIN employee ON trainer.employee_id = employee.employee_id WHERE employee.name = 'Sam Sulek'), 1, 0),
     ('Yoga', '11:00:00', '13:00:00', '2024-04-13', 'Flexibility', 'Group Yoga Session focusing on flexibility and core strength.', (SELECT trainer_id FROM trainer JOIN employee ON trainer.employee_id = employee.employee_id WHERE employee.name = 'Sam Sulek'), 20, 0),
     ('High-Intensity Interval Training', '16:00:00', '18:00:00', '2024-05-01', 'Fitness', 'High-paced interval training to boost cardiovascular health and stamina.', (SELECT trainer_id FROM trainer JOIN employee ON trainer.employee_id = employee.employee_id WHERE employee.name = 'Sam Sulek'), 15, 0),
     ('Strength Training', '14:00:00', '16:00:00', '2024-05-04', 'Muscle Building', 'Comprehensive strength training session focusing on major muscle groups.', (SELECT trainer_id FROM trainer JOIN employee ON trainer.employee_id = employee.employee_id WHERE employee.name = 'Sam Sulek'), 12, 0),

@@ -36,6 +36,62 @@ def memberexecuteChoice(choice,name,cur):
             getRoutine(name,cur)
         case 7:
             manageGoals(name,cur)
+def getGroupClasses(cur):
+    query = """
+        SELECT 
+            b.booking_id, 
+            c.class_id, 
+            c.start_time, 
+            c.end_time, 
+            c.date, 
+            c.purpose, 
+            c.description, 
+            r.room_id, 
+            r.room_number, 
+            r.name AS room_name, 
+            e.name AS trainer_name,
+            c.current_num_attendees,
+            c.max_attendance
+        FROM 
+            booking b
+        JOIN 
+            class c ON b.class_id = c.class_id
+        JOIN 
+            room r ON b.room_id = r.room_id
+        JOIN 
+            trainer t ON c.trainer_id = t.trainer_id
+        JOIN 
+            employee e ON t.employee_id = e.employee_id
+        WHERE 
+            c.max_attendance > 1 AND c.current_num_attendees < c.max_attendance
+    """
+    cur.execute(query)
+
+    rows = cur.fetchall()
+    if rows:
+        print("Bookings for Group Classes with Available Space:")
+        print("-" * 50)
+        for row in rows:
+            bookingID = row[0]
+            classID = row[1]
+            start_time = row[2]
+            end_time = row[3]
+            date = row[4]
+            purpose = row[5]
+            description = row[6]
+            roomID = row[7]
+            roomNum = row[8]
+            roomName = row[9]
+            trainer = row[10]
+            current_attendees = row[11]
+            max_attendees = row[12]
+            print("\nBooking ID:", bookingID, "Class ID:", classID, "Room ID:", roomID)
+            print(purpose, "Class with", trainer, "from", start_time, "to", end_time, "on", date)
+            print("in", roomName, "(" + str(roomNum) + "),", current_attendees, "/", max_attendees, "attendees")
+            print("Description:", description)
+            print("-" * 50)
+    else:
+        print("No bookings found for group classes with available space.")
 
 def manageGoals(name, cur):
     # Fetch member_id based on the given name
@@ -144,17 +200,24 @@ def manageMetrics(name, cur):
 
 
 def deleteClass(name, cur):
+    viewMyClassses(name,cur)
     classId = input("Enter Class ID you want to remove: ")
     
+    # Fetch member ID based on the provided name
     cur.execute("SELECT member_id FROM member WHERE name = %s", (name,))
     member_id = cur.fetchone()
     
     if member_id:
-        cur.execute("DELETE FROM takes WHERE member_id = %s AND class_id = %s", (member_id[0], classId))
-    
-        cur.execute("UPDATE class SET current_num_attendees = current_num_attendees - 1 WHERE class_id = %s", (classId,))
-        
-        print("Deletion successful!")
+        # Check if the member is actually taking the class
+        cur.execute("SELECT * FROM takes WHERE member_id = %s AND class_id = %s", (member_id[0], classId))
+        if cur.fetchone():
+            # Proceed with deleting the member from the class
+            cur.execute("DELETE FROM takes WHERE member_id = %s AND class_id = %s", (member_id[0], classId))
+            # Update the number of attendees in the class
+            cur.execute("UPDATE class SET current_num_attendees = current_num_attendees - 1 WHERE class_id = %s", (classId,))
+            print("Class successfully removed from your schedule.")
+        else:
+            print("This member is not enrolled in the specified class.")
     else:
         print("Member not found.")
 
@@ -227,7 +290,7 @@ def registerClass(name,cur):
 
 
 def registerGroupClass(name,cur):
-    getAllClasses(cur)
+    getGroupClasses(cur)
     class_id = input("\nEnter the class ID you want to register for: ")
     # Execute SQL query to insert record into 'takes' table
     cur.execute("""
@@ -246,16 +309,21 @@ def registerGroupClass(name,cur):
     print("Class registration successful!")
 
 def registerPersonalClass(name,cur):
-    getAllTrainers(cur)
-    trainer_id = input("\nEnter the trainer ID you want to take a class with: ")
-
-    getAvailableTime(trainer_id, cur)
-    available_time_id = input("\nEnter the available time ID you want to register for: ")
+    getPersonalClasses(cur)
+    class_id = input("\nEnter the class ID you want to register for: ")
     # Execute SQL query to insert record into 'takes' table
-    # Delete the booked available time from the available_time table
     cur.execute("""
-        DELETE FROM available_time WHERE available_time_id = %s
-        """, (available_time_id,))
+        INSERT INTO takes (member_id, class_id) VALUES (
+            (SELECT member_id FROM member WHERE name = %s), 
+            %s
+        )
+        """, (name, class_id,))
+    
+    cur.execute("""
+        UPDATE class
+        SET current_num_attendees = current_num_attendees + 1
+        WHERE class_id = %s
+        """, (class_id,))
     
     print("Class registration successful!")
 
@@ -360,3 +428,59 @@ def getAchievements(name, cur):
             print("-" * 50)
     else:
         print("\nNo completed goals found in the database.")
+def getPersonalClasses(cur):
+    query = """
+        SELECT 
+            b.booking_id, 
+            c.class_id, 
+            c.start_time, 
+            c.end_time, 
+            c.date, 
+            c.purpose, 
+            c.description, 
+            r.room_id, 
+            r.room_number, 
+            r.name AS room_name, 
+            e.name AS trainer_name,
+            c.current_num_attendees,
+            c.max_attendance  
+        FROM 
+            booking b
+        JOIN 
+            class c ON b.class_id = c.class_id
+        JOIN 
+            room r ON b.room_id = r.room_id
+        JOIN 
+            trainer t ON c.trainer_id = t.trainer_id
+        JOIN 
+            employee e ON t.employee_id = e.employee_id
+        WHERE 
+            c.max_attendance = 1 AND c.current_num_attendees < c.max_attendance
+    """
+    cur.execute(query)
+
+    rows = cur.fetchall()
+    if rows:
+        print("Bookings for Personal Training Classes with Available Space:")
+        print("-" * 50)
+        for row in rows:
+            bookingID = row[0]
+            classID = row[1]
+            start_time = row[2]
+            end_time = row[3]
+            date = row[4]
+            purpose = row[5]
+            description = row[6]
+            roomID = row[7]
+            roomNum = row[8]
+            roomName = row[9]
+            trainer = row[10]
+            current_attendees = row[11]
+            max_attendees = row[12]
+            print("\nBooking ID:", bookingID, "Class ID:", classID, "Room ID:", roomID)
+            print(purpose, "Class with", trainer, "from", start_time, "to", end_time, "on", date)
+            print("in", roomName, "(" + str(roomNum) + "),", current_attendees, "/", max_attendees, "attendees")
+            print("Description:", description)
+            print("-" * 50)
+    else:
+        print("No bookings found for personal training classes with available space.")
