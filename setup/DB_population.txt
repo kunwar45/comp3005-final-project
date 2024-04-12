@@ -32,11 +32,13 @@ INSERT INTO trainer (employee_id) VALUES
 INSERT INTO admin (employee_id) VALUES 
     ((SELECT employee_id FROM employee WHERE name = 'Austin Pham'));
 
-INSERT INTO class (class_name, time, purpose, description, trainer_id, max_attendance, current_num_attendees) VALUES 
-    ('Yoga', '09:00:00', 'Mobility', 'Group Yoga', (SELECT t.trainer_id FROM trainer t JOIN employee e ON t.employee_id = e.employee_id WHERE e.name = 'Sam Sulek'), 20, 0), -- Class run by Sam Sulek 
-    ('Personal Weight Training', '11:00:00', 'Strength', 'Weightlifting', (SELECT t.trainer_id FROM trainer t JOIN employee e ON t.employee_id = e.employee_id WHERE e.name = 'Sam Sulek'), 1, 0), -- Class run by Sam Sulek 
-    ('Run', '16:00:00', 'Cardio', 'Afternoon Run', (SELECT t.trainer_id FROM trainer t JOIN employee e ON t.employee_id = e.employee_id WHERE e.name = 'Matt Stark'), 15, 0); -- Class run by Matt Stark
-    ('Personal HIIT', '16:00:00', 'Cardio', 'Different Cardio Drills', (SELECT t.trainer_id FROM trainer t JOIN employee e ON t.employee_id = e.employee_id WHERE e.name = 'Matt Stark'), 1, 0); -- Class run by Matt Stark
+-- Inserting classes with details matching the provided available times
+INSERT INTO class (class_name, start_time, end_time, date, purpose, description, trainer_id, max_attendance, current_num_attendees) VALUES 
+    ('Yoga', '11:00:00', '13:00:00', '2024-04-13', 'Flexibility', 'Group Yoga Session focusing on flexibility and core strength.', (SELECT trainer_id FROM trainer JOIN employee ON trainer.employee_id = employee.employee_id WHERE employee.name = 'Sam Sulek'), 20, 0),
+    ('High-Intensity Interval Training', '16:00:00', '18:00:00', '2024-05-01', 'Fitness', 'High-paced interval training to boost cardiovascular health and stamina.', (SELECT trainer_id FROM trainer JOIN employee ON trainer.employee_id = employee.employee_id WHERE employee.name = 'Sam Sulek'), 15, 0),
+    ('Strength Training', '14:00:00', '16:00:00', '2024-05-04', 'Muscle Building', 'Comprehensive strength training session focusing on major muscle groups.', (SELECT trainer_id FROM trainer JOIN employee ON trainer.employee_id = employee.employee_id WHERE employee.name = 'Sam Sulek'), 12, 0),
+    ('Cardio Kickboxing', '11:00:00', '13:00:00', '2024-04-24', 'Cardio', 'Energetic kickboxing class that improves flexibility, strength, and cardiovascular endurance.', (SELECT trainer_id FROM trainer JOIN employee ON trainer.employee_id = employee.employee_id WHERE employee.name = 'Matt Stark'), 18, 0),
+    ('Circuit Training', '09:00:00', '11:00:00', '2024-04-15', 'Fitness', 'Circuit Training involving a series of exercises targeting different muscle groups with minimal rest.', (SELECT trainer_id FROM trainer JOIN employee ON trainer.employee_id = employee.employee_id WHERE employee.name = 'Matt Stark'), 10, 0);
 
 INSERT INTO room (room_number, name, description) VALUES
     (101, 'Ravens Nest', 'Indoor track and soccer field'),
@@ -70,13 +72,14 @@ INSERT INTO available_time (date, start_time, end_time, trainer_id) VALUES
 INSERT INTO takes (member_id, class_id) VALUES 
     ((SELECT member_id FROM member WHERE name = 'John Adams'), (SELECT class_id FROM class WHERE class_name = 'Yoga')),
     ((SELECT member_id FROM member WHERE name = 'May First'), (SELECT class_id FROM class WHERE class_name = 'Yoga')),
-    ((SELECT member_id FROM member WHERE name = 'Allen Sam'), (SELECT class_id FROM class WHERE class_name = 'Run')),
+    ((SELECT member_id FROM member WHERE name = 'Allen Sam'), (SELECT class_id FROM class WHERE class_name = 'Cardio Kickboxing')),
     ((SELECT member_id FROM member WHERE name = 'Sarah We'), (SELECT class_id FROM class WHERE class_name = 'Yoga')),
-    ((SELECT member_id FROM member WHERE name = 'John Adams'), (SELECT class_id FROM class WHERE class_name = 'Run'));
+    ((SELECT member_id FROM member WHERE name = 'John Adams'), (SELECT class_id FROM class WHERE class_name = 'Cardio Kickboxing'));
 
 INSERT INTO booking (class_id, room_id) VALUES 
     ((SELECT class_id FROM class WHERE class_name = 'Yoga'), (SELECT room_id FROM room WHERE name = 'Yoga Room')),
-    ((SELECT class_id FROM class WHERE class_name = 'Run'), (SELECT room_id FROM room WHERE name = 'Ravens Nest'));
+    ((SELECT class_id FROM class WHERE class_name = 'Cardio Kickboxing'), (SELECT room_id FROM room WHERE name = 'Ravens Nest')),
+    ((SELECT class_id FROM class WHERE class_name = 'Strength Training'), (SELECT room_id FROM room WHERE name = 'Gym'));
 
 INSERT INTO equipment (name, room_id, description, last_serviced) VALUES 
     ('Treadmill', (SELECT room_id FROM room WHERE name = 'Ravens Nest'), 'Treadmill for cardio workouts.', '2023-04-26'),
@@ -108,15 +111,15 @@ INSERT INTO billing (member_id, date_billed, payed) VALUES
     ((SELECT member_id FROM member WHERE name = 'Sarah We'), '2024-03-01', TRUE);
 
 INSERT INTO goal (member_id, description, date_completed) VALUES
-    ((SELECT member_id FROM member WHERE name = 'John Adams'), 'Run 10K', 2024-03-15),
+    ((SELECT member_id FROM member WHERE name = 'John Adams'), 'Run 10K', '2024-03-15'),
     ((SELECT member_id FROM member WHERE name = 'John Adams'), 'Bench 225', NULL),
-    ((SELECT member_id FROM member WHERE name = 'John Adams'), 'Swim 4K', 2010-01-15),
+    ((SELECT member_id FROM member WHERE name = 'John Adams'), 'Swim 4K', '2010-01-15'),
 
     ((SELECT member_id FROM member WHERE name = 'May First'), 'Lose 5 pounds', NULL),
-    ((SELECT member_id FROM member WHERE name = 'May First'), 'Increase flexibility', 2012-06-20),
+    ((SELECT member_id FROM member WHERE name = 'May First'), 'Increase flexibility', '2012-06-20'),
 
     ((SELECT member_id FROM member WHERE name = 'Allen Sam'), 'Complete 10 consecutive pull-ups', NULL),
-    ((SELECT member_id FROM member WHERE name = 'Allen Sam'), 'Run a half-marathon', 2013-02-20),
+    ((SELECT member_id FROM member WHERE name = 'Allen Sam'), 'Run a half-marathon', '2013-02-20'),
 
     ((SELECT member_id FROM member WHERE name = 'Sarah We'), 'Achieve bodyweight squat 1RM', NULL),
     ((SELECT member_id FROM member WHERE name = 'Sarah We'), 'Improve deadlift form', NULL);

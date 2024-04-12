@@ -102,7 +102,9 @@ def viewMyClassses(name, cur):
     query = """
     SELECT 
         c.class_id,
-        c.time,
+        c.start_time,
+        c.end_time,
+        c.date,
         c.purpose,
         c.description,
         e.name AS trainer_name,
@@ -130,19 +132,23 @@ def viewMyClassses(name, cur):
 
     if rows:
         print("\nYour Classes:")
+        print("-"*50)
         for row in rows:
-            id = str(row[0])
-            time = row[1]
-            purpose = row[2]
-            description = row[3]
-            trainer = row[4]
-            room_name = row[5]
-            room_number = row[6]
+            class_id = str(row[0])
+            start_time = row[1]
+            end_time = row[2]
+            date = row[3]
+            purpose = row[4]
+            description = row[5]
+            trainer = row[6]
+            room_name = row[7]
+            room_number = row[8]
 
-            print("\nClass ID:", id)
-            print(purpose, "Class with", trainer, "at", time)
+            print("\nClass ID:", class_id)
+            print(purpose, "Class with", trainer, "on", date, "from", start_time, "to", end_time)
             print("Description:", description)
             print("Room:", room_name, "(Room Number:", room_number, ")")
+            print("-"*50)
     else:
         print("\nNo Classes found in the database.")
 

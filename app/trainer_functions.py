@@ -7,6 +7,7 @@ def trainerMenu(name,cur):
         print("0: Exit Program")
         print("1: Add Class")
         print("2: Search member profile")
+        print("3: Add Available Time")
 
 
         #Takes in input and validates it
