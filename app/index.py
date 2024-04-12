@@ -65,6 +65,7 @@ def main():
         cur = conn.cursor()
         print("Connected to database")
         
+        
     except psycopg2.Error as e:
         print("Error connecting to the database:", e)
     #Control Flow, prints the seleciton menu and commits changes to the database 

@@ -29,23 +29,49 @@ def trainerExecuteChoice(choice,id,cur):
 def searchMember(cur):
     memberName = input("\nEnter member's name: ")
 
-    checkMember= "SELECT COUNT(*) FROM member WHERE name = %s;"
+    checkMember = "SELECT COUNT(*) FROM member WHERE name = %s;"
     cur.execute(checkMember, (memberName,))
     exists = cur.fetchone()[0]
 
     if exists > 0:
-        query = """
+        # Fetching member's goals
+        queryGoals = """
             SELECT g.description
             FROM member m
             JOIN goal g ON m.member_id = g.member_id
             WHERE m.name = %s;
             """
-        
-        cur.execute(query, (memberName,))
-        rows = cur.fetchall()
-        print(memberName,"goals:")
-        for row in rows:
-            print(row[0])
+        cur.execute(queryGoals, (memberName,))
+        goals = cur.fetchall()
+
+        if goals:
+            print(memberName, "goals:")
+            print("-" * 50)
+            for goal in goals:
+                print(goal[0])
+                print("-" * 50)
+        else:
+            print(memberName, "has no goals.")
+
+        queryMetrics = """
+            SELECT weight, height, age
+            FROM member m
+            JOIN metrics mtr ON m.member_id = mtr.member_id
+            WHERE m.name = %s;
+            """
+        cur.execute(queryMetrics, (memberName,))
+        metrics = cur.fetchone()
+
+        if metrics:
+            weight, height, age = metrics
+            print("\n" + memberName + "'s Metrics:")
+            print("-" * 50)
+            print("Weight:", weight)
+            print("Height:", height)
+            print("Age:", age)
+            print("-" * 50)
+        else:
+            print(memberName, "has no metrics.")
     else:
         print("No member found with that name.")
 

@@ -8,10 +8,12 @@ def adminMenu(name,cur):
         print("1: View Bookings")
         print("2: Book Class")
         print("3: View equipment")
+        print("4: View Billings")
+        print("5: Update Class Schedule")
 
         #Takes in input and validates it
         choice = int(input("Please select an option: "))
-        if choice < 0 or choice > 4:
+        if choice < 0 or choice > 6:
             print("\nInvalid input. Please enter a number between 0 and 4.\n ")
         else:
             return choice
@@ -27,6 +29,69 @@ def adminExecuteChoice(choice,cur):
             bookClass(cur)
         case 3:
             viewEquipment(cur)
+        case 4:
+            getBillings(cur)
+        case 5:
+            updateClass(cur)
+def updateClass(cur):
+    print("Current Classes:")
+    getBookings(cur) 
+
+    class_id = input("Enter the Class ID you want to update: ")
+    new_time = input("Enter the new time for the class (HH:MM:SS): ")
+
+    # Check if the trainer is available at the new time
+    check_trainer_availability_query = """
+    SELECT class_id 
+    FROM available_time 
+    WHERE trainer_id = (
+        SELECT trainer_id 
+        FROM class 
+        WHERE class_id = %s
+    ) AND date = DATE(NOW()) AND start_time <= %s AND end_time >= %s
+    """
+    cur.execute(check_trainer_availability_query, (class_id, new_time, new_time))
+    available = cur.fetchone()
+
+    if available:
+        # Update the class time
+        update_query = """
+        UPDATE class
+        SET time = %s
+        WHERE class_id = %s
+        """
+        cur.execute(update_query, (new_time, class_id))
+        print("Class time updated successfully!")
+    else:
+        print("Trainer is not available at the selected time.")
+
+
+def getBillings(cur):
+    # SQL query to fetch all billing information along with member details
+    query = """
+    SELECT b.billing_id, m.name AS member_name, b.date_billed, b.payed
+    FROM billing b
+    JOIN member m ON b.member_id = m.member_id
+    ORDER BY b.date_billed DESC
+    """
+    cur.execute(query)
+
+    # Fetch all rows
+    rows = cur.fetchall()
+
+    if rows:
+        print("Billing Information:")
+        print("-" * 50)
+        for row in rows:
+            billing_id, member_name, date_billed, payed = row
+            status = "Paid" if payed else "Pending"
+            print(f"Billing ID: {billing_id}")
+            print(f"Member Name: {member_name}")
+            print(f"Date Billed: {date_billed.strftime('%Y-%m-%d')}")
+            print(f"Status: {status}")
+            print("-" * 50)
+    else:
+        print("No billing records found.")
 
 def viewEquipment(cur):
     query = """
@@ -95,26 +160,25 @@ def bookClass(cur):
         
 def getUnassingedClasses(cur):
     query="""
-        SELECT 
-            class.class_id,
-            class.time,
-            class.purpose,
-            class.description,
-            employee.name AS trainer_name,
-            class.max_attendance,
-            class.current_num_attendees
-        FROM 
-            class
-        JOIN 
-            trainer ON class.trainer_id = trainer.employee_id
-        JOIN 
-            employee ON trainer.employee_id = employee.employee_id
-        WHERE
-            NOT EXISTS (
-                SELECT 1 
-                FROM booking 
-                WHERE booking.class_id = class.class_id
-            )
+    SELECT 
+        c.class_id,
+        c.class_name,
+        c.time,
+        c.purpose,
+        c.description,
+        e.name AS trainer_name,
+        c.max_attendance,
+        c.current_num_attendees
+    FROM 
+        class c
+    LEFT JOIN 
+        booking b ON c.class_id = b.class_id
+    LEFT JOIN 
+        trainer t ON c.trainer_id = t.trainer_id
+    LEFT JOIN 
+        employee e ON t.employee_id = e.employee_id
+    WHERE 
+        b.booking_id IS NULL;
     """
     cur.execute(query)
     rows = cur.fetchall()

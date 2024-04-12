@@ -78,7 +78,9 @@ CREATE TABLE goal (
 CREATE TABLE class (
     class_id SERIAL PRIMARY KEY,
     class_name VARCHAR(255) NOT NULL,
-    time TIME,
+    start_time TIME,
+    end_time TIME,
+    date DATE,
     purpose TEXT,
     description TEXT,
     trainer_id INT NOT NULL,
@@ -86,7 +88,6 @@ CREATE TABLE class (
     current_num_attendees INT, 
     FOREIGN KEY (trainer_id) REFERENCES trainer(trainer_id)
 );
-
 CREATE TABLE takes (
     member_id INT NOT NULL,
     class_id INT NOT NULL,

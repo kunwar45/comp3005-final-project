@@ -34,7 +34,9 @@ INSERT INTO admin (employee_id) VALUES
 
 INSERT INTO class (class_name, time, purpose, description, trainer_id, max_attendance, current_num_attendees) VALUES 
     ('Yoga', '09:00:00', 'Mobility', 'Group Yoga', (SELECT t.trainer_id FROM trainer t JOIN employee e ON t.employee_id = e.employee_id WHERE e.name = 'Sam Sulek'), 20, 0), -- Class run by Sam Sulek 
+    ('Personal Weight Training', '11:00:00', 'Strength', 'Weightlifting', (SELECT t.trainer_id FROM trainer t JOIN employee e ON t.employee_id = e.employee_id WHERE e.name = 'Sam Sulek'), 1, 0), -- Class run by Sam Sulek 
     ('Run', '16:00:00', 'Cardio', 'Afternoon Run', (SELECT t.trainer_id FROM trainer t JOIN employee e ON t.employee_id = e.employee_id WHERE e.name = 'Matt Stark'), 15, 0); -- Class run by Matt Stark
+    ('Personal HIIT', '16:00:00', 'Cardio', 'Different Cardio Drills', (SELECT t.trainer_id FROM trainer t JOIN employee e ON t.employee_id = e.employee_id WHERE e.name = 'Matt Stark'), 1, 0); -- Class run by Matt Stark
 
 INSERT INTO room (room_number, name, description) VALUES
     (101, 'Ravens Nest', 'Indoor track and soccer field'),
@@ -104,3 +106,17 @@ INSERT INTO billing (member_id, date_billed, payed) VALUES
     ((SELECT member_id FROM member WHERE name = 'Sarah We'), '2024-01-01', TRUE),
     ((SELECT member_id FROM member WHERE name = 'Sarah We'), '2024-02-01', TRUE),
     ((SELECT member_id FROM member WHERE name = 'Sarah We'), '2024-03-01', TRUE);
+
+INSERT INTO goal (member_id, description, date_completed) VALUES
+    ((SELECT member_id FROM member WHERE name = 'John Adams'), 'Run 10K', 2024-03-15),
+    ((SELECT member_id FROM member WHERE name = 'John Adams'), 'Bench 225', NULL),
+    ((SELECT member_id FROM member WHERE name = 'John Adams'), 'Swim 4K', 2010-01-15),
+
+    ((SELECT member_id FROM member WHERE name = 'May First'), 'Lose 5 pounds', NULL),
+    ((SELECT member_id FROM member WHERE name = 'May First'), 'Increase flexibility', 2012-06-20),
+
+    ((SELECT member_id FROM member WHERE name = 'Allen Sam'), 'Complete 10 consecutive pull-ups', NULL),
+    ((SELECT member_id FROM member WHERE name = 'Allen Sam'), 'Run a half-marathon', 2013-02-20),
+
+    ((SELECT member_id FROM member WHERE name = 'Sarah We'), 'Achieve bodyweight squat 1RM', NULL),
+    ((SELECT member_id FROM member WHERE name = 'Sarah We'), 'Improve deadlift form', NULL);
