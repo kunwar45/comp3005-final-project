@@ -1,5 +1,4 @@
 import psycopg2
-from CRUD import *
 from user_controls import *
 
 def isTrainer(name,cur):
