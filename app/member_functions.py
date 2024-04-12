@@ -10,7 +10,6 @@ def memberMenu():
         print("6: See Routines")
         print("7: View/Set Goals")
 
-
         #Takes in input and validates it
         choice = int(input("Please select an option: "))
         if choice < 0 or choice > 7:
@@ -214,18 +213,74 @@ def viewMyClassses(name, cur):
     else:
         print("\nNo Classes found in the database.")
 
-def registerClass(id,cur):
+def registerClass(name,cur):
+    print("1: Register for a group class")
+    print("2: Register for personal class")
+
+    choice = int(input("Please select an option: "))
+    if choice < 0 or choice > 2:
+        print("\nInvalid input. Please enter a number between 1 and 2.\n ")
+    elif choice == 1:
+        registerGroupClass(name,cur)
+    elif choice == 2:
+        registerPersonalClass(name,cur)
+
+
+def registerGroupClass(name,cur):
     getAllClasses(cur)
     class_id = input("\nEnter the class ID you want to register for: ")
     # Execute SQL query to insert record into 'takes' table
-    cur.execute("INSERT INTO takes (member_id, class_id) VALUES (%s, %s)", (id, class_id))
+    cur.execute("""
+        INSERT INTO takes (member_id, class_id) VALUES (
+            (SELECT member_id FROM member WHERE name = %s), 
+            %s
+        )
+        """, (name, class_id,))
+    
+    cur.execute("""
+        UPDATE class
+        SET current_num_attendees = current_num_attendees + 1
+        WHERE class_id = %s
+        """, (class_id,))
+    
     print("Class registration successful!")
+
+def registerPersonalClass(name,cur):
+    getAllTrainers(cur)
+    trainer_id = input("\nEnter the trainer ID you want to take a class with: ")
+
+    getAvailableTime(trainer_id, cur)
+    available_time_id = input("\nEnter the available time ID you want to register for: ")
+    # Execute SQL query to insert record into 'takes' table
+    # Delete the booked available time from the available_time table
+    cur.execute("""
+        DELETE FROM available_time WHERE available_time_id = %s
+        """, (available_time_id,))
+    
+    print("Class registration successful!")
+
+def getAvailableTime(trainer_id, cur):
+    cur.execute("""
+    SELECT available_time_id, date, start_time, end_time
+    FROM available_time
+    WHERE trainer_id = %s
+    ORDER BY date, start_time
+    """, (trainer_id,))
+
+    available_times = cur.fetchall()
+
+    for time in available_times:
+        print(f"Available Time ID: {time[0]}, Date: {time[1]}, Start Time: {time[2]}, End Time: {time[3]}")
+    
 
 def getAllClasses(cur):
     query = """
         SELECT 
             class.class_id,
-            class.time,
+            class.class_name,
+            class.start_time,
+            class.end_time,
+            class.date,
             class.purpose,
             class.description,
             employee.name AS trainer_name,
@@ -251,21 +306,40 @@ def getAllClasses(cur):
         print("\nAvailable Classes:")
         for row in rows:
             id = str(row[0])
-            time = row[1]
-            purpose = row[2]
-            description = row[3]
-            trainer = row[4]
-            max = row[5]
-            curr = row[6]
-            roomName = row[7]
-            roomNum = row[8]
+            name = row[1]
+            stime = row[2]
+            etime = row[3]
+            date = row[4]
+            purpose = row[5]
+            desc = row[6]
+            trainer = row[7]
+            max = row[8]
+            curr = row[9]
+            roomName = row[10]
+            roomNum = row[11]
             if(max!=curr):#checks if 
-                print("\nClass ID: "+ id)
-                print(purpose,"Class with",trainer, "at",time,"in",roomName, "("+str(roomNum)+")")
-                print("Description:",description)
-                print("Spots left!", max-curr)
+                print("\nClass ID: "+ id + ", name: " + name)
+                print(purpose,"Class with",trainer, " from: ",stime, " to ", etime ,"on", date)
+                print("Room: ",roomName, "(",roomNum,")")
+                print("Description:",desc)
+                print("Max Attendance: ", max)
+                print("Current Attendance: ", curr)
     else:
         print("\nNo Classes found in the database.")
+
+def getAllTrainers(cur):
+    cur.execute("""
+    SELECT t.trainer_id, e.name
+    FROM trainer t
+    JOIN employee e ON t.employee_id = e.employee_id
+    """)
+    
+    # Fetch all rows from the executed query
+    trainers = cur.fetchall()
+    
+    # Optionally, you can print the results here or process them as needed
+    for trainer in trainers:
+        print(f"Trainer ID: {trainer[0]}, Name: {trainer[1]}")
     
 def getAchievements(name, cur):
     selectQuery = """
