@@ -8,11 +8,12 @@ def memberMenu():
         print("4: Remove a Class")
         print("5: Manage Metrics")
         print("6: See Routines")
+        print("7: View/Set Goals")
 
 
         #Takes in input and validates it
         choice = int(input("Please select an option: "))
-        if choice < 0 or choice > 6:
+        if choice < 0 or choice > 7:
             print("\nInvalid input. Please enter a number between 0 and 4.\n ")
         else:
             return choice
@@ -34,24 +35,75 @@ def memberexecuteChoice(choice,name,cur):
             manageMetrics(name,cur)
         case 6:
             getRoutine(name,cur)
-def getRoutine(name,cur):
-    query = """
-        SELECT description
-        FROM exercise_routine er
-        JOIN member m ON er.member_id = m.member_id
-        WHERE m.name = %s;
-        """
-    cur.execute(query, (name,))
-    routines = cur.fetchall()
+        case 7:
+            manageGoals(name,cur)
 
-    if routines:
-        print(f"\n{name}'s Routine:")
-        print("-" * 50)
-        for routine in routines:
-            print(routine[0])
-        print("-" * 50)
+def manageGoals(name, cur):
+    # Fetch member_id based on the given name
+    cur.execute("SELECT member_id FROM member WHERE name = %s", (name,))
+    member_id = cur.fetchone()
+    
+    if member_id:
+        # Fetch existing goals for the member
+        cur.execute("SELECT goal_id, description, date_completed FROM goal WHERE member_id = %s", (member_id,))
+        goals = cur.fetchall()
+        
+        if goals:
+            print(f"\n{name}'s Goals:")
+            print("-" * 50)
+            for goal in goals:
+                goal_id, description, date_completed = goal
+                completed_status = "Completed on: " + str(date_completed) if date_completed else "Not completed"
+                print(f"Goal ID: {goal_id}, Description: {description}, Status: {completed_status}")
+            print("-" * 50)
+            
+            # Ask if the user wants to update any goal's completion date
+            update_choice = input("Do you want to set/update a completion date for a goal? (yes/no): ")
+            if update_choice.lower() == 'yes':
+                goal_id = input("Enter the Goal ID to update: ")
+                new_date = input("Enter the new completion date (YYYY-MM-DD): ")
+                cur.execute("UPDATE goal SET date_completed = %s WHERE goal_id = %s AND member_id = %s", (new_date, goal_id, member_id))
+                print("Goal updated successfully!")
+        else:
+            print("No goals found for this member.")
+        
+        # Ask if the user wants to add a new goal
+        new_goal_choice = input("Do you want to add a new goal? (yes/no): ")
+        if new_goal_choice.lower() == 'yes':
+            new_description = input("Enter the description of the new goal: ")
+            cur.execute("INSERT INTO goal (member_id, description) VALUES (%s, %s)", (member_id, new_description))
+            print("New goal added successfully!")
     else:
-        print(f"No routines found for {name}.")
+        print(f"Member named {name} not found.")
+
+def getRoutine(name, cur):
+    cur.execute("SELECT member_id FROM member WHERE name = %s", (name,))
+    member_id = cur.fetchone()
+
+    if member_id:
+        query = """
+            SELECT description
+            FROM exercise_routine
+            WHERE member_id = %s;
+            """
+        cur.execute(query, (member_id,))
+        routines = cur.fetchall()
+
+        if routines:
+            print(f"\n{name}'s Routine:")
+            print("-" * 50)
+            for routine in routines:
+                print(routine[0])
+            print("-" * 50)
+        else:
+            print(f"You have no routines.")
+            # Ask the user if they want to add a new routine
+            new_routine = input("Enter your new routine: ")
+            cur.execute("INSERT INTO exercise_routine (member_id, description) VALUES (%s, %s)", (member_id[0], new_routine))
+            print("New routine added successfully!")
+    else:
+        print(f"Member named {name} not found.")
+
 def manageMetrics(name, cur):
     cur.execute("SELECT member_id FROM member WHERE name = %s", (name,))
     member_id = cur.fetchone()
@@ -64,23 +116,33 @@ def manageMetrics(name, cur):
             weight, height, age = metrics
             print("\nCurrent Metrics:")
             print("-" * 50)
-            print("Weight:", str(weight)+"kg")
-            print("Height:", height+"cm")
+            print("Weight:", str(weight) + "kg")
+            print("Height:", str(height) + "cm")
             print("Age:", age)
             print("-" * 50)
             
             # Prompt for new metrics
-            new_weight = input("Enter new weight: ")
-            new_height = input("Enter new height: ")
+            new_weight = input("Enter new weight (kg): ")
+            new_height = input("Enter new height (cm): ")
             new_age = input("Enter new age: ")
             
             # Update metrics in the database
-            cur.execute("UPDATE metrics SET weight = %s, height = %s, age = %s WHERE member_id = %s", (new_weight, new_height, new_age, member_id[0]))
+            cur.execute("UPDATE metrics SET weight = %s, height = %s, age = %s WHERE member_id = %s",
+                        (new_weight, new_height, new_age, member_id[0]))
             print("Metrics updated successfully!")
         else:
-            print("No metrics found for the member.")
+            print("No metrics found for the member. Let's initialize your metrics.")
+            new_weight = input("Enter weight (kg): ")
+            new_height = input("Enter height (cm): ")
+            new_age = input("Enter age: ")
+            
+            # Insert new metrics into the database
+            cur.execute("INSERT INTO metrics (member_id, weight, height, age) VALUES (%s, %s, %s, %s)",
+                        (member_id[0], new_weight, new_height, new_age))
+            print("Metrics initialized successfully!")
     else:
         print("Member not found.")
+
 
 def deleteClass(name, cur):
     classId = input("Enter Class ID you want to remove: ")

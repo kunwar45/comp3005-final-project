@@ -35,35 +35,50 @@ def adminExecuteChoice(choice,cur):
             updateClass(cur)
 def updateClass(cur):
     print("Current Classes:")
-    getBookings(cur) 
-
+    getBookings(cur)
+    
     class_id = input("Enter the Class ID you want to update: ")
-    new_time = input("Enter the new time for the class (HH:MM:SS): ")
-
-    # Check if the trainer is available at the new time
-    check_trainer_availability_query = """
-    SELECT class_id 
-    FROM available_time 
-    WHERE trainer_id = (
-        SELECT trainer_id 
-        FROM class 
-        WHERE class_id = %s
-    ) AND date = DATE(NOW()) AND start_time <= %s AND end_time >= %s
-    """
-    cur.execute(check_trainer_availability_query, (class_id, new_time, new_time))
-    available = cur.fetchone()
-
-    if available:
-        # Update the class time
-        update_query = """
-        UPDATE class
-        SET time = %s
-        WHERE class_id = %s
+    
+    # Get the current class details
+    cur.execute("SELECT start_time, end_time, date, trainer_id FROM class WHERE class_id = %s", (class_id,))
+    class_info = cur.fetchone()
+    
+    if class_info:
+        current_start_time, current_end_time, current_date, trainer_id = class_info
+        print("Current Date:", current_date)
+        print("Current Start Time:", current_start_time)
+        print("Current End Time:", current_end_time)
+        
+        new_date = input("Enter the new date (YYYY-MM-DD): ")
+        new_start_time = input("Enter the new start time (HH:MM:SS): ")
+        new_end_time = input("Enter the new end time (HH:MM:SS): ")
+        
+        # Check if the trainer is available at the new time
+        trainer_available_query = """
+            SELECT EXISTS (
+                SELECT 1
+                FROM available_time
+                WHERE date = %s AND start_time = %s AND end_time = %s AND trainer_id = %s
+            )
         """
-        cur.execute(update_query, (new_time, class_id))
-        print("Class time updated successfully!")
+        cur.execute(trainer_available_query, (new_date, new_start_time, new_end_time, trainer_id))
+        trainer_available = cur.fetchone()[0]
+        
+        if trainer_available:
+            # Update the class with the new details
+            update_query = """
+                UPDATE class
+                SET start_time = %s, end_time = %s, date = %s
+                WHERE class_id = %s
+            """
+            cur.execute(update_query, (new_start_time, new_end_time, new_date, class_id))
+            print("Class details updated successfully!")
+        else:
+            print("The trainer is not available at the specified time.")
     else:
-        print("Trainer is not available at the selected time.")
+        print("Invalid Class ID.")
+
+
 
 
 def getBillings(cur):
@@ -119,51 +134,61 @@ def viewEquipment(cur):
         print("No equipment found.")
     
 def bookClass(cur):
-    getUnassingedClasses(cur)
+    getUnassignedClasses(cur)
     classID = input("Enter Class ID: ")
-    cur.execute("SELECT time FROM class WHERE class_id = %s", (classID,))
-    classTime = cur.fetchone()[0]
+    cur.execute("SELECT start_time, end_time, date FROM class WHERE class_id = %s", (classID,))
+    classInfo = cur.fetchone()
 
-    query="""
+    if classInfo:
+        start_time, end_time, class_date = classInfo
+        query = """
         SELECT 
-            room_id,
-            room_number,
-            name AS room_name
+            r.room_id,
+            r.room_number,
+            r.name AS room_name
         FROM 
-            room
+            room r
         WHERE 
-            room_id NOT IN (
+            r.room_id NOT IN (
                 SELECT 
-                    room_id 
+                    b.room_id 
                 FROM 
-                    booking
+                    booking b
                 JOIN 
-                    class ON booking.class_id = class.class_id 
+                    class c ON b.class_id = c.class_id 
                 WHERE 
-                    class.time = %s
+                    c.start_time = %s AND c.end_time = %s AND c.date = %s
             )
         """
-    cur.execute(query,(classTime,))
-    rows = cur.fetchall()
+        cur.execute(query, (start_time, end_time, class_date))
+        rows = cur.fetchall()
 
-    if rows:
-        print("\nAvailable Rooms at:",classTime)
-        print("-" * 50)
-        for row in rows:
-            room_id, room_number, room_name = row
-            print("Room ID:", room_id)
-            print("Room Number:", room_number)
-            print("Room Name:", room_name)
+        if rows:
+            print("\nAvailable Rooms for Class ID", classID, "on", class_date, "from", start_time, "to", end_time)
             print("-" * 50)
-    roomID = input("Enter a room ID: ")
-    cur.execute("INSERT INTO booking (class_id, room_id) VALUES (%s, %s)", (classID, roomID))
+            for row in rows:
+                room_id, room_number, room_name = row
+                print("Room ID:", room_id)
+                print("Room Number:", room_number)
+                print("Room Name:", room_name)
+                print("-" * 50)
+            roomID = input("Enter a room ID: ")
+            cur.execute("INSERT INTO booking (class_id, room_id) VALUES (%s, %s)", (classID, roomID))
+            print("Booking successful!")
+        else:
+            print("No available rooms for the selected class.")
+    else:
+        print("Invalid Class ID.")
+
         
-def getUnassingedClasses(cur):
-    query="""
+def getUnassignedClasses(cur):
+    query = """
     SELECT 
         c.class_id,
         c.class_name,
-        c.time,
+        c.start_time,
+        c.end_time,
+        c.date,
         c.purpose,
         c.description,
         e.name AS trainer_name,
@@ -187,41 +212,66 @@ def getUnassingedClasses(cur):
         print("\nUnassigned Classes:")
         print("-" * 50)
         for row in rows:
-            id, time, purpose, description, trainer, max, curr = row
-            print("\nClass ID:", id)
-            print(purpose,"Class with",trainer, "at",time)
-            print("Description:",description)
-            print("Spots left:", max-curr)
+            class_id, class_name, start_time, end_time, date, purpose, description, trainer_name, max_attendance, curr_attendees = row
+            print("\nClass ID:", class_id)
+            print("Class Name:", class_name)
+            print("Date:", date)
+            print("Time:", start_time, "-", end_time)
+            print("Purpose:", purpose)
+            print("Description:", description)
+            print("Trainer:", trainer_name)
+            print("Maximum Attendance:", max_attendance)
+            print("Current Number of Attendees:", curr_attendees)
             print("-" * 50)
     else:
         print("No available classes found.")
+
 def getBookings(cur):
     query = """
-            SELECT b.booking_id, c.*, r.*, e.name AS trainer_name
-            FROM booking b
-            JOIN class c ON b.class_id = c.class_id
-            JOIN room r ON b.room_id = r.room_id
-            JOIN trainer t ON c.trainer_id = t.employee_id
-            JOIN employee e ON t.employee_id = e.employee_id
-            """
+        SELECT 
+            b.booking_id, 
+            c.class_id, 
+            c.start_time, 
+            c.end_time, 
+            c.date, 
+            c.purpose, 
+            c.description, 
+            r.room_id, 
+            r.room_number, 
+            r.name AS room_name, 
+            e.name AS trainer_name
+        FROM 
+            booking b
+        JOIN 
+            class c ON b.class_id = c.class_id
+        JOIN 
+            room r ON b.room_id = r.room_id
+        JOIN 
+            trainer t ON c.trainer_id = t.trainer_id
+        JOIN 
+            employee e ON t.employee_id = e.employee_id
+    """
     cur.execute(query)
-        
 
     rows = cur.fetchall()
+    print("Bookings:")
+    print("-"*50)
     for row in rows:
         bookingID = row[0]
         classID = row[1]
-        time = row[2]
-        purpose = row[3]
-        description= row[4]
-        roomID = row[9]
-        roomNum = row[10]
-        roomName = row[11]
-        trainer = row[13]
-        print("\nBooking ID:",bookingID,"Class ID:", classID, "Room ID:",roomID)
-        print(purpose,"Class with",trainer, "at",time,"in",roomName, "("+str(roomNum)+")")
-        print("Description:",description)
-
+        start_time = row[2]
+        end_time = row[3]
+        date = row[4]
+        purpose = row[5]
+        description = row[6]
+        roomID = row[7]
+        roomNum = row[8]
+        roomName = row[9]
+        trainer = row[10]
+        print("\nBooking ID:", bookingID, "Class ID:", classID, "Room ID:", roomID)
+        print(purpose, "Class with", trainer, "at", start_time, "to", end_time, "on", date, "in", roomName, "(" + str(roomNum) + ")")
+        print("Description:", description)
+        print("-"*50)
 
     
 

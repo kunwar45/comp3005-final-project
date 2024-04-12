@@ -100,11 +100,11 @@ INSERT INTO billing (member_id, date_billed, payed) VALUES
     
     ((SELECT member_id FROM member WHERE name = 'May First'), '2024-01-01', TRUE),
     ((SELECT member_id FROM member WHERE name = 'May First'), '2024-02-01', TRUE),
-    ((SELECT member_id FROM member WHERE name = 'May First'), '2024-03-01', TRUE),
+    ((SELECT member_id FROM member WHERE name = 'May First'), '2024-03-01', FALSE),
     
     ((SELECT member_id FROM member WHERE name = 'Allen Sam'), '2024-01-01', TRUE),
-    ((SELECT member_id FROM member WHERE name = 'Allen Sam'), '2024-02-01', TRUE),
-    ((SELECT member_id FROM member WHERE name = 'Allen Sam'), '2024-03-01', TRUE),
+    ((SELECT member_id FROM member WHERE name = 'Allen Sam'), '2024-02-01', FALSE),
+    ((SELECT member_id FROM member WHERE name = 'Allen Sam'), '2024-03-01', FALSE),
     
     ((SELECT member_id FROM member WHERE name = 'Sarah We'), '2024-01-01', TRUE),
     ((SELECT member_id FROM member WHERE name = 'Sarah We'), '2024-02-01', TRUE),

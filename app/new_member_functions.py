@@ -32,7 +32,7 @@ def addMember(cur):
 
     insert_query = "INSERT INTO member (name, subscription_id) VALUES (%s, (SELECT subscription_id FROM subscription WHERE tier_name = %s))"
     cur.execute(insert_query, memberTuple)
-    return 1
+    return name
 
 #Prints all the tiers of every student
 def getTiers(cur):

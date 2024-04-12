@@ -12,23 +12,24 @@ def adminControl(id,cur,conn):
 
 def newMemberControl(cur,conn):
     choice =-1
-    while choice!=0:
+    while choice!=0 and choice!=2:
         choice = newMemberMenu()
-        registered = newMemberexecuteChoice(choice,cur)
-        if (registered):
+        name = newMemberexecuteChoice(choice,cur)
+        if (choice==2):
             print("You have been successfully registered!")
+            memberControl(name,cur,conn)
         conn.commit()
 
-def trainerControl(id,cur,conn):
+def trainerControl(name,cur,conn):
     choice =-1
     while choice!=0:
         choice = trainerMenu(id,cur)
-        trainerExecuteChoice(choice,id,cur)
+        trainerExecuteChoice(choice,name,cur)
         conn.commit()
 
-def memberControl(id,cur,conn):
+def memberControl(name,cur,conn):
     choice =-1
-    while choice!=0:
+    while choice!=0 and choice!=2:
         choice = memberMenu()
-        memberexecuteChoice(choice,id,cur)
+        memberexecuteChoice(choice,name,cur)
         conn.commit()
