@@ -1,3 +1,4 @@
+import psycopg2
 def newMemberMenu():
     while True:
         #Prints all options
@@ -31,13 +32,19 @@ def addMember(cur):
     memberTuple = (name,tier_name[tier])
 
     insert_query = "INSERT INTO member (name, subscription_id) VALUES (%s, (SELECT subscription_id FROM subscription WHERE tier_name = %s))"
-    cur.execute(insert_query, memberTuple)
+    try:
+        cur.execute(insert_query, memberTuple)
+    except psycopg2.Error as e:
+        print(f"An error occurred: {e}")
     return name
 
 #Prints all the tiers of every student
 def getTiers(cur):
     selectQuery = "SELECT * FROM subscription"
-    cur.execute(selectQuery)
+    try:
+        cur.execute(selectQuery)
+    except psycopg2.Error as e:
+        print(f"An error occurred: {e}")
     tiers = cur.fetchall()
     #(id,tier,desc,price)
 

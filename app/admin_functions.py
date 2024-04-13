@@ -1,3 +1,6 @@
+import psycopg2
+
+
 def adminMenu(name,cur):
     # cur.execute("SELECT name FROM employee WHERE employee_id=%s",id)
     # name= cur.fetchone()[0]
@@ -38,9 +41,12 @@ def updateClass(cur):
     getBookings(cur)
     
     class_id = input("Enter the Class ID you want to update: ")
-    
-    # Get the current class details
-    cur.execute("SELECT start_time, end_time, date, trainer_id FROM class WHERE class_id = %s", (class_id,))
+
+    try:    
+        # Get the current class details
+        cur.execute("SELECT start_time, end_time, date, trainer_id FROM class WHERE class_id = %s", (class_id,))
+    except psycopg2.Error as e:
+        print(f"An error occurred: {e}")
     class_info = cur.fetchone()
     
     if class_info:
@@ -61,7 +67,11 @@ def updateClass(cur):
                 WHERE date = %s AND start_time = %s AND end_time = %s AND trainer_id = %s
             )
         """
-        cur.execute(trainer_available_query, (new_date, new_start_time, new_end_time, trainer_id))
+
+        try: 
+            cur.execute(trainer_available_query, (new_date, new_start_time, new_end_time, trainer_id))
+        except psycopg2.Error as e:
+            print(f"An error occurred: {e}")
         trainer_available = cur.fetchone()[0]
         
         if trainer_available:
@@ -71,7 +81,10 @@ def updateClass(cur):
                 SET start_time = %s, end_time = %s, date = %s
                 WHERE class_id = %s
             """
-            cur.execute(update_query, (new_start_time, new_end_time, new_date, class_id))
+            try: 
+                cur.execute(update_query, (new_start_time, new_end_time, new_date, class_id))
+            except psycopg2.Error as e:
+                print(f"An error occurred: {e}")
             print("Class details updated successfully!")
         else:
             print("The trainer is not available at the specified time.")
@@ -89,7 +102,10 @@ def getBillings(cur):
     JOIN member m ON b.member_id = m.member_id
     ORDER BY b.date_billed DESC
     """
-    cur.execute(query)
+    try:
+        cur.execute(query)
+    except psycopg2.Error as e:
+            print(f"An error occurred: {e}")
 
     # Fetch all rows
     rows = cur.fetchall()
@@ -114,7 +130,10 @@ def viewEquipment(cur):
     FROM equipment e
     JOIN room r ON e.room_id = r.room_id
     """
-    cur.execute(query)
+    try:
+        cur.execute(query)
+    except psycopg2.Error as e:
+            print(f"An error occurred: {e}")
     
     # Fetch all rows
     rows = cur.fetchall()
@@ -136,7 +155,10 @@ def viewEquipment(cur):
 def bookClass(cur):
     getUnassignedClasses(cur)
     classID = input("Enter Class ID: ")
-    cur.execute("SELECT start_time, end_time, date FROM class WHERE class_id = %s", (classID,))
+    try: 
+        cur.execute("SELECT start_time, end_time, date FROM class WHERE class_id = %s", (classID,))
+    except psycopg2.Error as e:
+            print(f"An error occurred: {e}")
     classInfo = cur.fetchone()
 
     if classInfo:
@@ -160,7 +182,10 @@ def bookClass(cur):
                     c.start_time = %s AND c.end_time = %s AND c.date = %s
             )
         """
-        cur.execute(query, (start_time, end_time, class_date))
+        try:
+            cur.execute(query, (start_time, end_time, class_date))
+        except psycopg2.Error as e:
+            print(f"An error occurred: {e}")
         rows = cur.fetchall()
 
         if rows:
@@ -173,7 +198,10 @@ def bookClass(cur):
                 print("Room Name:", room_name)
                 print("-" * 50)
             roomID = input("Enter a room ID: ")
-            cur.execute("INSERT INTO booking (class_id, room_id) VALUES (%s, %s)", (classID, roomID))
+            try:
+                cur.execute("INSERT INTO booking (class_id, room_id) VALUES (%s, %s)", (classID, roomID))
+            except psycopg2.Error as e:
+                print(f"An error occurred: {e}")
             print("Booking successful!")
         else:
             print("No available rooms for the selected class.")
@@ -205,7 +233,10 @@ def getUnassignedClasses(cur):
     WHERE 
         b.booking_id IS NULL;
     """
-    cur.execute(query)
+    try:
+        cur.execute(query)
+    except psycopg2.Error as e:
+            print(f"An error occurred: {e}")
     rows = cur.fetchall()
 
     if rows:

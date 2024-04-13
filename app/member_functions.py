@@ -1,3 +1,4 @@
+import psycopg2
 def memberMenu():
     while True:
         #Prints all options
@@ -65,8 +66,12 @@ def getGroupClasses(cur):
         WHERE 
             c.max_attendance > 1 AND c.current_num_attendees < c.max_attendance
     """
-    cur.execute(query)
 
+    try:
+        cur.execute(query)
+    except psycopg2.Error as e:
+            print(f"An error occurred: {e}")
+            
     rows = cur.fetchall()
     if rows:
         print("Bookings for Group Classes with Available Space:")
@@ -95,12 +100,18 @@ def getGroupClasses(cur):
 
 def manageGoals(name, cur):
     # Fetch member_id based on the given name
-    cur.execute("SELECT member_id FROM member WHERE name = %s", (name,))
+    try:
+        cur.execute("SELECT member_id FROM member WHERE name = %s", (name,))
+    except psycopg2.Error as e:
+            print(f"An error occurred: {e}")
     member_id = cur.fetchone()
     
     if member_id:
         # Fetch existing goals for the member
-        cur.execute("SELECT goal_id, description, date_completed FROM goal WHERE member_id = %s", (member_id,))
+        try:
+            cur.execute("SELECT goal_id, description, date_completed FROM goal WHERE member_id = %s", (member_id,))
+        except psycopg2.Error as e:
+            print(f"An error occurred: {e}")
         goals = cur.fetchall()
         
         if goals:
@@ -117,7 +128,10 @@ def manageGoals(name, cur):
             if update_choice.lower() == 'yes':
                 goal_id = input("Enter the Goal ID to update: ")
                 new_date = input("Enter the new completion date (YYYY-MM-DD): ")
-                cur.execute("UPDATE goal SET date_completed = %s WHERE goal_id = %s AND member_id = %s", (new_date, goal_id, member_id))
+                try:
+                    cur.execute("UPDATE goal SET date_completed = %s WHERE goal_id = %s AND member_id = %s", (new_date, goal_id, member_id))
+                except psycopg2.Error as e:
+                    print(f"An error occurred: {e}")
                 print("Goal updated successfully!")
         else:
             print("No goals found for this member.")
@@ -126,13 +140,19 @@ def manageGoals(name, cur):
         new_goal_choice = input("Do you want to add a new goal? (yes/no): ")
         if new_goal_choice.lower() == 'yes':
             new_description = input("Enter the description of the new goal: ")
-            cur.execute("INSERT INTO goal (member_id, description) VALUES (%s, %s)", (member_id, new_description))
+            try:
+                cur.execute("INSERT INTO goal (member_id, description) VALUES (%s, %s)", (member_id, new_description))
+            except psycopg2.Error as e:
+                print(f"An error occurred: {e}")
             print("New goal added successfully!")
     else:
         print(f"Member named {name} not found.")
 
 def getRoutine(name, cur):
-    cur.execute("SELECT member_id FROM member WHERE name = %s", (name,))
+    try:
+        cur.execute("SELECT member_id FROM member WHERE name = %s", (name,))
+    except psycopg2.Error as e:
+            print(f"An error occurred: {e}")
     member_id = cur.fetchone()
 
     if member_id:
@@ -141,7 +161,10 @@ def getRoutine(name, cur):
             FROM exercise_routine
             WHERE member_id = %s;
             """
-        cur.execute(query, (member_id,))
+        try:
+            cur.execute(query, (member_id,))
+        except psycopg2.Error as e:
+            print(f"An error occurred: {e}")
         routines = cur.fetchall()
 
         if routines:
@@ -154,17 +177,26 @@ def getRoutine(name, cur):
             print(f"You have no routines.")
             # Ask the user if they want to add a new routine
             new_routine = input("Enter your new routine: ")
-            cur.execute("INSERT INTO exercise_routine (member_id, description) VALUES (%s, %s)", (member_id[0], new_routine))
+            try:
+                cur.execute("INSERT INTO exercise_routine (member_id, description) VALUES (%s, %s)", (member_id[0], new_routine))
+            except psycopg2.Error as e:
+                print(f"An error occurred: {e}")
             print("New routine added successfully!")
     else:
         print(f"Member named {name} not found.")
 
 def manageMetrics(name, cur):
-    cur.execute("SELECT member_id FROM member WHERE name = %s", (name,))
+    try:
+        cur.execute("SELECT member_id FROM member WHERE name = %s", (name,))
+    except psycopg2.Error as e:
+            print(f"An error occurred: {e}")
     member_id = cur.fetchone()
     
     if member_id:
-        cur.execute("SELECT weight, height, age FROM metrics WHERE member_id = %s", (member_id[0],))
+        try:
+            cur.execute("SELECT weight, height, age FROM metrics WHERE member_id = %s", (member_id[0],))
+        except psycopg2.Error as e:
+            print(f"An error occurred: {e}")
         metrics = cur.fetchone()
         
         if metrics:
@@ -182,8 +214,11 @@ def manageMetrics(name, cur):
             new_age = input("Enter new age: ")
             
             # Update metrics in the database
-            cur.execute("UPDATE metrics SET weight = %s, height = %s, age = %s WHERE member_id = %s",
-                        (new_weight, new_height, new_age, member_id[0]))
+            try:
+                cur.execute("UPDATE metrics SET weight = %s, height = %s, age = %s WHERE member_id = %s",(new_weight, new_height, new_age, member_id[0]))
+            except psycopg2.Error as e:
+                print(f"An error occurred: {e}")
+                        
             print("Metrics updated successfully!")
         else:
             print("No metrics found for the member. Let's initialize your metrics.")
@@ -192,8 +227,11 @@ def manageMetrics(name, cur):
             new_age = input("Enter age: ")
             
             # Insert new metrics into the database
-            cur.execute("INSERT INTO metrics (member_id, weight, height, age) VALUES (%s, %s, %s, %s)",
-                        (member_id[0], new_weight, new_height, new_age))
+            try:
+                cur.execute("INSERT INTO metrics (member_id, weight, height, age) VALUES (%s, %s, %s, %s)",(member_id[0], new_weight, new_height, new_age))
+            except psycopg2.Error as e:
+                print(f"An error occurred: {e}")
+                        
             print("Metrics initialized successfully!")
     else:
         print("Member not found.")
@@ -204,17 +242,29 @@ def deleteClass(name, cur):
     classId = input("Enter Class ID you want to remove: ")
     
     # Fetch member ID based on the provided name
-    cur.execute("SELECT member_id FROM member WHERE name = %s", (name,))
+    try:
+        cur.execute("SELECT member_id FROM member WHERE name = %s", (name,))
+    except psycopg2.Error as e:
+            print(f"An error occurred: {e}")
     member_id = cur.fetchone()
     
     if member_id:
         # Check if the member is actually taking the class
-        cur.execute("SELECT * FROM takes WHERE member_id = %s AND class_id = %s", (member_id[0], classId))
+        try:
+            cur.execute("SELECT * FROM takes WHERE member_id = %s AND class_id = %s", (member_id[0], classId))
+        except psycopg2.Error as e:
+            print(f"An error occurred: {e}")
         if cur.fetchone():
             # Proceed with deleting the member from the class
-            cur.execute("DELETE FROM takes WHERE member_id = %s AND class_id = %s", (member_id[0], classId))
+            try:
+                cur.execute("DELETE FROM takes WHERE member_id = %s AND class_id = %s", (member_id[0], classId))
+            except psycopg2.Error as e:
+                print(f"An error occurred: {e}")
             # Update the number of attendees in the class
-            cur.execute("UPDATE class SET current_num_attendees = current_num_attendees - 1 WHERE class_id = %s", (classId,))
+            try:
+                cur.execute("UPDATE class SET current_num_attendees = current_num_attendees - 1 WHERE class_id = %s", (classId,))
+            except psycopg2.Error as e:
+                print(f"An error occurred: {e}")
             print("Class successfully removed from your schedule.")
         else:
             print("This member is not enrolled in the specified class.")
@@ -251,7 +301,10 @@ def viewMyClassses(name, cur):
     WHERE 
         m.name = %s;
     """
-    cur.execute(query, (name,))
+    try:
+        cur.execute(query, (name,))
+    except psycopg2.Error as e:
+            print(f"An error occurred: {e}")
     rows = cur.fetchall()
 
     if rows:
@@ -293,53 +346,61 @@ def registerGroupClass(name,cur):
     getGroupClasses(cur)
     class_id = input("\nEnter the class ID you want to register for: ")
     # Execute SQL query to insert record into 'takes' table
-    cur.execute("""
-        INSERT INTO takes (member_id, class_id) VALUES (
-            (SELECT member_id FROM member WHERE name = %s), 
-            %s
-        )
-        """, (name, class_id,))
-    
-    cur.execute("""
-        UPDATE class
-        SET current_num_attendees = current_num_attendees + 1
-        WHERE class_id = %s
-        """, (class_id,))
-    
+    try:
+        cur.execute("""
+            INSERT INTO takes (member_id, class_id) VALUES (
+                (SELECT member_id FROM member WHERE name = %s), 
+                %s
+            )
+            """, (name, class_id,))
+        
+        cur.execute("""
+            UPDATE class
+            SET current_num_attendees = current_num_attendees + 1
+            WHERE class_id = %s
+            """, (class_id,))
+    except psycopg2.Error as e:
+            print(f"An error occurred: {e}")
+        
     print("Class registration successful!")
 
 def registerPersonalClass(name,cur):
     getPersonalClasses(cur)
     class_id = input("\nEnter the class ID you want to register for: ")
     # Execute SQL query to insert record into 'takes' table
-    cur.execute("""
-        INSERT INTO takes (member_id, class_id) VALUES (
-            (SELECT member_id FROM member WHERE name = %s), 
-            %s
-        )
-        """, (name, class_id,))
-    
-    cur.execute("""
-        UPDATE class
-        SET current_num_attendees = current_num_attendees + 1
-        WHERE class_id = %s
-        """, (class_id,))
+    try:
+        cur.execute("""
+            INSERT INTO takes (member_id, class_id) VALUES (
+                (SELECT member_id FROM member WHERE name = %s), 
+                %s
+            )
+            """, (name, class_id,))
+        
+        cur.execute("""
+            UPDATE class
+            SET current_num_attendees = current_num_attendees + 1
+            WHERE class_id = %s
+            """, (class_id,))
+    except psycopg2.Error as e:
+            print(f"An error occurred: {e}")
     
     print("Class registration successful!")
 
 def getAvailableTime(trainer_id, cur):
-    cur.execute("""
-    SELECT available_time_id, date, start_time, end_time
-    FROM available_time
-    WHERE trainer_id = %s
-    ORDER BY date, start_time
-    """, (trainer_id,))
+    try:
+        cur.execute("""
+        SELECT available_time_id, date, start_time, end_time
+        FROM available_time
+        WHERE trainer_id = %s
+        ORDER BY date, start_time
+        """, (trainer_id,))
+    except psycopg2.Error as e:
+            print(f"An error occurred: {e}")
 
     available_times = cur.fetchall()
 
     for time in available_times:
-        print(f"Available Time ID: {time[0]}, Date: {time[1]}, Start Time: {time[2]}, End Time: {time[3]}")
-    
+        print(f"Available Time ID: {time[0]}, Date: {time[1]}, Start Time: {time[2]}, End Time: {time[3]}")   
 
 def getAllClasses(cur):
     query = """
@@ -367,7 +428,10 @@ def getAllClasses(cur):
         JOIN
             room ON booking.room_id = room.room_id;
     """
-    cur.execute(query)
+    try:
+        cur.execute(query)
+    except psycopg2.Error as e:
+            print(f"An error occurred: {e}")
     rows = cur.fetchall()
 
     if rows:
@@ -396,11 +460,14 @@ def getAllClasses(cur):
         print("\nNo Classes found in the database.")
 
 def getAllTrainers(cur):
-    cur.execute("""
-    SELECT t.trainer_id, e.name
-    FROM trainer t
-    JOIN employee e ON t.employee_id = e.employee_id
-    """)
+    try:
+        cur.execute("""
+        SELECT t.trainer_id, e.name
+        FROM trainer t
+        JOIN employee e ON t.employee_id = e.employee_id
+        """)
+    except psycopg2.Error as e:
+            print(f"An error occurred: {e}")
     
     # Fetch all rows from the executed query
     trainers = cur.fetchall()
@@ -416,7 +483,10 @@ def getAchievements(name, cur):
     JOIN member m ON g.member_id = m.member_id
     WHERE m.name = %s AND g.date_completed IS NOT NULL
     """
-    cur.execute(selectQuery, (name,))
+    try:
+        cur.execute(selectQuery, (name,))
+    except psycopg2.Error as e:
+            print(f"An error occurred: {e}")
     achievements = cur.fetchall()
 
     if achievements:
@@ -457,7 +527,10 @@ def getPersonalClasses(cur):
         WHERE 
             c.max_attendance = 1 AND c.current_num_attendees < c.max_attendance
     """
-    cur.execute(query)
+    try:
+        cur.execute(query)
+    except psycopg2.Error as e:
+            print(f"An error occurred: {e}")
 
     rows = cur.fetchall()
     if rows:

@@ -2,16 +2,25 @@ import psycopg2
 from user_controls import *
 
 def isTrainer(name,cur):
-    cur.execute("SELECT EXISTS(SELECT 1 FROM trainer JOIN employee ON trainer.employee_id = employee.employee_id WHERE employee.name = %s)", (name,))
+    try:
+        cur.execute("SELECT EXISTS(SELECT 1 FROM trainer JOIN employee ON trainer.employee_id = employee.employee_id WHERE employee.name = %s)", (name,))
+    except psycopg2.Error as e:
+        print(f"An error occurred: {e}")
     return cur.fetchone()[0]
 
 # Function to check if ID exists in Admin table
 def isAdmin(name,cur):
-    cur.execute("SELECT EXISTS(SELECT 1 FROM admin JOIN employee ON admin.employee_id = employee.employee_id WHERE employee.name = %s)", (name,))
+    try:
+        cur.execute("SELECT EXISTS(SELECT 1 FROM admin JOIN employee ON admin.employee_id = employee.employee_id WHERE employee.name = %s)", (name,))
+    except psycopg2.Error as e:
+        print(f"An error occurred: {e}")
     return cur.fetchone()[0]
 
 def isMember(name,cur):
-    cur.execute("SELECT EXISTS(SELECT 1 FROM member WHERE name = %s)", (name,))
+    try:
+        cur.execute("SELECT EXISTS(SELECT 1 FROM member WHERE name = %s)", (name,))
+    except psycopg2.Error as e:
+        print(f"An error occurred: {e}")
     return cur.fetchone()[0]
 
 def loginMenu(cur,conn):
