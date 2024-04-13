@@ -139,3 +139,40 @@ CREATE TABLE billing (
     payed BOOLEAN NOT NULL,
     FOREIGN KEY (member_id) REFERENCES member(member_id)
 );
+
+-- Indexes for Employee Table
+CREATE INDEX idx_employee_name ON employee (name);
+
+-- Indexes for Trainer Table
+CREATE INDEX idx_trainer_employee_id ON trainer (employee_id);
+
+-- Indexes for Admin Table
+CREATE INDEX idx_admin_employee_id ON admin (employee_id);
+
+-- Indexes for Available Time Table
+CREATE INDEX idx_available_time_trainer_id ON available_time (trainer_id);
+CREATE INDEX idx_available_time_date ON available_time (date);
+
+-- Indexes for Member Table
+CREATE INDEX idx_member_subscription_id ON member (subscription_id);
+
+-- Indexes for Subscription Table
+CREATE INDEX idx_subscription_tier_name ON subscription (tier_name);
+
+-- Indexes for Class Table
+CREATE INDEX idx_class_trainer_id ON class (trainer_id);
+CREATE INDEX idx_class_date ON class (date);
+
+-- Indexes for Booking Table
+CREATE INDEX idx_booking_class_id ON booking (class_id);
+CREATE INDEX idx_booking_room_id ON booking (room_id);
+
+-- Indexes for Equipment Table
+CREATE INDEX idx_equipment_room_id ON equipment (room_id);
+
+-- Indexes for Metrics Table
+CREATE INDEX idx_metrics_member_id ON metrics (member_id);
+
+-- Indexes for Billing Table
+CREATE INDEX idx_billing_member_id ON billing (member_id);
+CREATE INDEX idx_billing_date_billed ON billing (date_billed);
