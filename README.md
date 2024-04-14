@@ -9,8 +9,9 @@ video - https://youtu.be/qiti0COdn1E
 This is the repository for the COMP 3005 final project, version 2.
 
 ## Database Setup
-Open PGAdmin and run DB_setup.sql in the query tool to create the database.
-Run DB_population.sql to populate the database with sample data.
+Open PGAdmin and run `DB_setup.sql` in the query tool to create the database.
+
+Run `DB_population.sql` to populate the database with sample data.
 
 ## To run
 
