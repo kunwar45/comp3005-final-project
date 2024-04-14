@@ -1,6 +1,5 @@
 import psycopg2
 
-
 def adminMenu(name,cur):
     # cur.execute("SELECT name FROM employee WHERE employee_id=%s",id)
     # name= cur.fetchone()[0]
