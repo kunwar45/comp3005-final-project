@@ -4,7 +4,7 @@ Brandon Le - 101257189
 
 Kunwar Nir - 101257428
 
-video - https://youtu.be/qiti0COdn1E
+video - https://youtu.be/l-wIssgzBzs
 
 This is the repository for the COMP 3005 final project, version 2.
 
