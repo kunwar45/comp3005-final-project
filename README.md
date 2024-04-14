@@ -8,10 +8,11 @@ video - https://youtu.be/qiti0COdn1E
 
 ## To run
 
+To install `psycopg2-binary`:
+
 ```
 $ pip install -r requirements.txt
 ```
 
-To install `psycopg2-binary`
-
+Then,
 Run the `index.py` file. 
